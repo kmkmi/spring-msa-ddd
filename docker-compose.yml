@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Configuration Service
   config-service:
-    image: openjdk:17-jdk-slim
+    build: ./config-service
     container_name: config-service
     ports:
       - "8888:8888"
@@ -14,6 +14,12 @@ services:
     command: java -jar app.jar
     networks:
       - msa-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # API Gateway
   api-gateway:
@@ -26,6 +32,8 @@ services:
     working_dir: /app
     command: java -jar app.jar
     depends_on:
+      config-service:
+        condition: service_healthy
       consul:
         condition: service_started
     networks:
@@ -42,6 +50,8 @@ services:
     working_dir: /app
     command: java -jar app.jar
     depends_on:
+      config-service:
+        condition: service_healthy
       campaign-db:
         condition: service_healthy
       consul:
@@ -60,6 +70,8 @@ services:
     working_dir: /app
     command: java -jar app.jar
     depends_on:
+      config-service:
+        condition: service_healthy
       user-db:
         condition: service_healthy
       consul:
@@ -78,6 +90,8 @@ services:
     working_dir: /app
     command: java -jar app.jar
     depends_on:
+      config-service:
+        condition: service_healthy
       ad-db:
         condition: service_healthy
       consul:
@@ -96,6 +110,8 @@ services:
     working_dir: /app
     command: java -jar app.jar
     depends_on:
+      config-service:
+        condition: service_healthy
       publisher-db:
         condition: service_healthy
       consul:

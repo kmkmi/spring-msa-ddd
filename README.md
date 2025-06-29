@@ -650,14 +650,14 @@ Postman 컬렉션과 환경 설정이 포함되어 있습니다:
 
 ### 🔗 Swagger UI 접속 URL
 - **Campaign Service**: http://localhost:8081/swagger-ui.html
-- **Ad Service**: http://localhost:8082/swagger-ui.html  
-- **User Service**: http://localhost:8083/swagger-ui.html
+- **User Service**: http://localhost:8082/swagger-ui.html
+- **Ad Service**: http://localhost:8083/swagger-ui.html  
 - **Publisher Service**: http://localhost:8084/swagger-ui.html
 
 ### 📋 OpenAPI JSON 문서
 - **Campaign Service**: http://localhost:8081/api-docs
-- **Ad Service**: http://localhost:8082/api-docs
-- **User Service**: http://localhost:8083/api-docs
+- **User Service**: http://localhost:8082/api-docs
+- **Ad Service**: http://localhost:8083/api-docs
 - **Publisher Service**: http://localhost:8084/api-docs
 
 ### 🛠️ Swagger UI 기능

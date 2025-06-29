@@ -8,14 +8,14 @@
 
 ### Swagger UI 인터페이스
 - **Campaign Service**: http://localhost:8081/swagger-ui.html
-- **Ad Service**: http://localhost:8082/swagger-ui.html  
-- **User Service**: http://localhost:8083/swagger-ui.html
+- **User Service**: http://localhost:8082/swagger-ui.html
+- **Ad Service**: http://localhost:8083/swagger-ui.html  
 - **Publisher Service**: http://localhost:8084/swagger-ui.html
 
 ### OpenAPI JSON 문서
 - **Campaign Service**: http://localhost:8081/api-docs
-- **Ad Service**: http://localhost:8082/api-docs
-- **User Service**: http://localhost:8083/api-docs
+- **User Service**: http://localhost:8082/api-docs
+- **Ad Service**: http://localhost:8083/api-docs
 - **Publisher Service**: http://localhost:8084/api-docs
 
 ## 🛠️ 주요 기능
