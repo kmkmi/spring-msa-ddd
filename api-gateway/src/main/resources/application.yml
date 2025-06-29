@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+  config:
+    import: optional:configserver:http://config-service:8888
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        enabled: true
+        service-name: api-gateway
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+    config:
+      uri: http://config-service:8888
+      fail-fast: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+    import: optional:configserver:http://config-service:8888
+  cloud:
+    config:
+      uri: http://config-service:8888 

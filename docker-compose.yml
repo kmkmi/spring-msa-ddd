@@ -1,0 +1,240 @@
+version: '3.8'
+
+services:
+  # Configuration Service
+  config-service:
+    image: openjdk:17-jdk-slim
+    container_name: config-service
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-service/target/config-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+      - ./config-service/src/main/resources/config:/app/config
+    working_dir: /app
+    command: java -jar app.jar
+    networks:
+      - msa-network
+
+  # API Gateway
+  api-gateway:
+    image: openjdk:17-jdk-slim
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+
+  # Campaign Service
+  campaign-service:
+    image: openjdk:17-jdk-slim
+    container_name: campaign-service
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./campaign-service/target/campaign-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      campaign-db:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+
+  # User Service
+  user-service:
+    image: openjdk:17-jdk-slim
+    container_name: user-service
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./user-service/target/user-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      user-db:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+
+  # Ad Service
+  ad-service:
+    image: openjdk:17-jdk-slim
+    container_name: ad-service
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./ad-service/target/ad-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      ad-db:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+
+  # Publisher Service
+  publisher-service:
+    image: openjdk:17-jdk-slim
+    container_name: publisher-service
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./publisher-service/target/publisher-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      publisher-db:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+
+  # MySQL Database (통합)
+  mysql:
+    image: mysql:8.0
+    container_name: demo-mysql-1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: msa
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - msa-network
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - msa-network
+
+  # Ad DB
+  ad-db:
+    image: mysql:8.0
+    container_name: demo-ad-db-1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ad_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docs/sql/init-ad-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docs/sql:/docker-entrypoint-initdb.d/sql
+    networks:
+      - msa-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  campaign-db:
+    image: mysql:8.0
+    container_name: demo-campaign-db-1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: campaign_db
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./docs/sql/init-campaign-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docs/sql:/docker-entrypoint-initdb.d/sql
+    networks:
+      - msa-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  publisher-db:
+    image: mysql:8.0
+    container_name: demo-publisher-db-1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: publisher_db
+    ports:
+      - "3309:3306"
+    volumes:
+      - ./docs/sql/init-publisher-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docs/sql:/docker-entrypoint-initdb.d/sql
+    networks:
+      - msa-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # User DB
+  user-db:
+    image: mysql:8.0
+    container_name: demo-user-db-1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: userdb
+    ports:
+      - "3310:3306"
+    volumes:
+      - ./docs/sql/init-user-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docs/sql:/docker-entrypoint-initdb.d/sql
+    networks:
+      - msa-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Consul for Service Discovery
+  consul:
+    image: consul:1.15
+    container_name: consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: consul agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -data-dir=/consul/data
+    volumes:
+      - consul-data:/consul/data
+    networks:
+      - msa-network
+
+  # Discovery Service
+  discovery-service:
+    image: openjdk:17-jdk-slim
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    volumes:
+      - ./discovery-service/target/discovery-service-0.0.1-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: java -jar app.jar
+    networks:
+      - msa-network
+
+volumes:
+  mysql-data:
+  consul-data:
+
+networks:
+  msa-network:
+    driver: bridge 

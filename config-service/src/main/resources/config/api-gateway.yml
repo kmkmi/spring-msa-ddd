@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: campaign-service
+          uri: lb://campaign-service
+          predicates:
+            - Path=/api/campaigns/**
+          filters:
+            - StripPrefix=1
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=1
+        - id: ad-service
+          uri: lb://ad-service
+          predicates:
+            - Path=/api/ads/**
+          filters:
+            - StripPrefix=1
+        - id: publisher-service
+          uri: lb://publisher-service
+          predicates:
+            - Path=/api/publishers/**
+          filters:
+            - StripPrefix=1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG 

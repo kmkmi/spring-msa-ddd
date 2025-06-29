@@ -1,0 +1,26 @@
+# 공통 설정
+spring:
+  cloud:
+    kubernetes:
+      discovery:
+        enabled: true
+        all-namespaces: false
+      config:
+        enabled: true
+        sources:
+          - namespace: default
+            name: config-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    org.springframework.cloud.kubernetes: DEBUG 

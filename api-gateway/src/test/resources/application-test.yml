@@ -1,0 +1,41 @@
+spring:
+  cloud:
+    consul:
+      enabled: false
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - StripPrefix=1
+        - id: campaign-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/campaign-service/**
+          filters:
+            - StripPrefix=1
+        - id: ad-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/ad-service/**
+          filters:
+            - StripPrefix=1
+        - id: publisher-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/publisher-service/**
+          filters:
+            - StripPrefix=1
+
+server:
+  port: 0
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG 

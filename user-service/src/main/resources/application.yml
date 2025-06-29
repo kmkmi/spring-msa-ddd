@@ -1,0 +1,103 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: user-service
+  config:
+    import: optional:configserver:http://config-service:8888
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    config:
+      uri: http://config-service:8888
+    kubernetes:
+      discovery:
+        enabled: true
+        all-namespaces: false
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        enabled: true
+        service-name: user-service
+        health-check-path: /users/health
+        health-check-interval: 15s
+        prefer-ip-address: true
+        hostname: user-service
+  datasource:
+    url: jdbc:mysql://user-db:3306/user_service_db?useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+
+# Swagger UI 설정
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+    import: optional:configserver:http://config-service:8888
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    config:
+      uri: http://config-service:8888
+    kubernetes:
+      discovery:
+        enabled: true
+  datasource:
+    url: jdbc:mysql://user-db:3306/userdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
+    username: root
+    password: root
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  sql:
+    init:
+      mode: always
+      continue-on-error: true 
