@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Configuration Service
   config-service:
@@ -231,19 +229,6 @@ services:
     command: consul agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -data-dir=/consul/data
     volumes:
       - consul-data:/consul/data
-    networks:
-      - msa-network
-
-  # Discovery Service
-  discovery-service:
-    image: openjdk:17-jdk-slim
-    container_name: discovery-service
-    ports:
-      - "8761:8761"
-    volumes:
-      - ./discovery-service/target/discovery-service-0.0.1-SNAPSHOT.jar:/app/app.jar
-    working_dir: /app
-    command: java -jar app.jar
     networks:
       - msa-network
 

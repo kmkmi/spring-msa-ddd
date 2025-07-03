@@ -3,7 +3,9 @@ package com.example.campaign.application.service;
 import com.example.campaign.application.dto.CreateCampaignRequest;
 import com.example.campaign.application.dto.CampaignResponse;
 import com.example.campaign.domain.Campaign;
-import com.example.campaign.domain.repository.CampaignRepository;
+import com.example.campaign.domain.service.CampaignDomainService;
+import com.example.campaign.infrastructure.repository.CampaignRepository;
+import com.example.campaign.common.exception.CampaignNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class CampaignService {
     
     private final CampaignRepository campaignRepository;
+    private final CampaignDomainService campaignDomainService;
     
     @Transactional
     public CampaignResponse createCampaign(CreateCampaignRequest request) {
@@ -42,7 +45,7 @@ public class CampaignService {
                 .targetLocations(request.getTargetLocations())
                 .build();
         
-        Campaign savedCampaign = campaignRepository.save(campaign);
+        Campaign savedCampaign = campaignDomainService.createCampaign(campaign);
         log.info("Campaign created with id: {}", savedCampaign.getId());
         
         return CampaignResponse.from(savedCampaign);
@@ -52,7 +55,7 @@ public class CampaignService {
         log.info("Getting campaign by id: {}", id);
         
         Campaign campaign = campaignRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Campaign not found with id: " + id));
+                .orElseThrow(() -> new CampaignNotFoundException(id));
         
         return CampaignResponse.from(campaign);
     }
@@ -84,11 +87,7 @@ public class CampaignService {
     public CampaignResponse updateCampaignStatus(Long id, Campaign.CampaignStatus status) {
         log.info("Updating campaign status for id: {} to: {}", id, status);
         
-        Campaign campaign = campaignRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Campaign not found with id: " + id));
-        
-        campaign.setStatus(status);
-        Campaign updatedCampaign = campaignRepository.save(campaign);
+        Campaign updatedCampaign = campaignDomainService.updateCampaignStatus(id, status);
         
         return CampaignResponse.from(updatedCampaign);
     }
@@ -97,12 +96,7 @@ public class CampaignService {
     public CampaignResponse updateCampaignBudget(Long id, BigDecimal budgetAmount, BigDecimal dailyBudget) {
         log.info("Updating campaign budget for id: {} to budget: {}, daily: {}", id, budgetAmount, dailyBudget);
         
-        Campaign campaign = campaignRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Campaign not found with id: " + id));
-        
-        campaign.setBudgetAmount(budgetAmount);
-        campaign.setDailyBudget(dailyBudget);
-        Campaign updatedCampaign = campaignRepository.save(campaign);
+        Campaign updatedCampaign = campaignDomainService.updateCampaignBudget(id, budgetAmount, dailyBudget);
         
         return CampaignResponse.from(updatedCampaign);
     }

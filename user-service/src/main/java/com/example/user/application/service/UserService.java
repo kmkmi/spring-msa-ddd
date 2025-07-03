@@ -3,7 +3,7 @@ package com.example.user.application.service;
 import com.example.user.application.dto.CreateUserRequest;
 import com.example.user.application.dto.UserResponse;
 import com.example.user.domain.User;
-import com.example.user.domain.repository.UserRepository;
+import com.example.user.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

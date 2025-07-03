@@ -1,7 +1,7 @@
 package com.example.ad.application.service;
 
 import com.example.ad.domain.Advertisement;
-import com.example.ad.domain.repository.AdvertisementRepository;
+import com.example.ad.infrastructure.repository.AdvertisementRepository;
 import com.example.ad.application.dto.AdvertisementRequest;
 import com.example.ad.application.dto.AdvertisementResponse;
 import lombok.RequiredArgsConstructor;

@@ -3,7 +3,6 @@ package com.example.ad;
 import com.example.ad.application.dto.AdvertisementRequest;
 import com.example.ad.application.dto.AdvertisementResponse;
 import com.example.ad.application.service.AdvertisementService;
-import com.example.ad.domain.Advertisement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

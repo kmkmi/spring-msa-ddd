@@ -68,11 +68,36 @@ public class Campaign {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
+    @Column(name = "spent_amount", precision = 10, scale = 2)
+    private BigDecimal spentAmount;
+    
     public enum CampaignStatus {
         DRAFT, ACTIVE, PAUSED, COMPLETED, CANCELLED
     }
     
     public enum CampaignType {
         DISPLAY, VIDEO, NATIVE, SEARCH, SOCIAL
+    }
+    
+    /**
+     * 캠페인 상태 업데이트
+     */
+    public void updateStatus(CampaignStatus newStatus) {
+        this.status = newStatus;
+    }
+    
+    /**
+     * 캠페인 예산 업데이트
+     */
+    public void updateBudget(BigDecimal budgetAmount, BigDecimal dailyBudget) {
+        this.budgetAmount = budgetAmount;
+        this.dailyBudget = dailyBudget;
+    }
+    
+    /**
+     * 지출 금액 업데이트
+     */
+    public void updateSpentAmount(BigDecimal spentAmount) {
+        this.spentAmount = spentAmount;
     }
 } 

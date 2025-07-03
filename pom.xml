@@ -29,17 +29,17 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<spring-cloud.version>2023.0.3</spring-cloud.version>
 	</properties>
 	
 	<modules>
-		<module>shared</module>
-		<module>campaign-service</module>
 		<module>ad-service</module>
-		<module>user-service</module>
-		<module>publisher-service</module>
 		<module>api-gateway</module>
+		<module>campaign-service</module>
 		<module>config-service</module>
-		<module>discovery-service</module>
+		<module>publisher-service</module>
+		<module>shared</module>
+		<module>user-service</module>
 	</modules>
 
 	<dependencies>
@@ -72,6 +72,18 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>

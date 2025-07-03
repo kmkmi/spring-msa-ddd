@@ -49,7 +49,7 @@ graph TB
     style User fill:#e8f5e8
 ```
 
-## 📁 프로젝트 구조
+## 📁 프로젝트 구조 (개선된 DDD 패턴)
 
 ```
 demo/
@@ -79,10 +79,30 @@ demo/
 ├── config-service/              # ⚙️ 설정 관리 서비스
 ├── discovery-service/           # 🔍 서비스 디스커버리
 ├── api-gateway/                 # 🚪 API 게이트웨이
-├── campaign-service/            # 📢 캠페인 관리 서비스
-├── ad-service/                  # 📺 광고 관리 서비스
-├── publisher-service/           # 👥 퍼블리셔 관리 서비스
-├── user-service/                # 👤 사용자 관리 서비스
+├── campaign-service/            # 📢 캠페인 관리 서비스 (개선된 DDD)
+│   ├── presentation/           # 🎯 REST API 컨트롤러
+│   ├── application/            # 📋 애플리케이션 서비스 + DTO
+│   ├── domain/                 # 🏛️ 도메인 엔티티 + 서비스 + 이벤트
+│   ├── infrastructure/         # 🏗️ 데이터 접근 + 외부 연동
+│   └── common/                 # 🔧 공통 기능 (예외, 설정, 유틸리티)
+├── ad-service/                  # 📺 광고 관리 서비스 (개선된 DDD)
+│   ├── presentation/           # 🎯 REST API 컨트롤러
+│   ├── application/            # 📋 애플리케이션 서비스 + DTO
+│   ├── domain/                 # 🏛️ 도메인 엔티티 + 서비스 + 이벤트
+│   ├── infrastructure/         # 🏗️ 데이터 접근 + 외부 연동
+│   └── common/                 # 🔧 공통 기능 (예외, 설정, 유틸리티)
+├── publisher-service/           # 👥 퍼블리셔 관리 서비스 (개선된 DDD)
+│   ├── presentation/           # 🎯 REST API 컨트롤러
+│   ├── application/            # 📋 애플리케이션 서비스 + DTO
+│   ├── domain/                 # 🏛️ 도메인 엔티티 + 서비스 + 이벤트
+│   ├── infrastructure/         # 🏗️ 데이터 접근 + 외부 연동
+│   └── common/                 # 🔧 공통 기능 (예외, 설정, 유틸리티)
+├── user-service/                # 👤 사용자 관리 서비스 (개선된 DDD)
+│   ├── presentation/           # 🎯 REST API 컨트롤러
+│   ├── application/            # 📋 애플리케이션 서비스 + DTO
+│   ├── domain/                 # 🏛️ 도메인 엔티티 + 서비스 + 이벤트
+│   ├── infrastructure/         # 🏗️ 데이터 접근 + 외부 연동
+│   └── common/                 # 🔧 공통 기능 (예외, 설정, 유틸리티)
 ├── shared/                      # 🔗 공유 모듈
 ├── k8s/                         # ☸️ Kubernetes 매니페스트
 ├── postman/                     # 📮 API 테스트 환경
@@ -119,30 +139,63 @@ demo/
 - **Lombok**
 - **Postman** (API 테스트)
 
-## 🏛️ DDD 아키텍처 패턴
+## 🏛️ DDD 아키텍처 패턴 (개선된 구조)
 
-각 서비스는 Domain-Driven Design 패턴을 따릅니다:
+각 서비스는 개선된 Domain-Driven Design 패턴을 따릅니다:
 
 ```mermaid
 graph TB
-    subgraph "DDD 레이어 구조"
-        Interface[인터페이스 레이어<br/>Controller]
-        Application[애플리케이션 레이어<br/>Service + DTO]
-        Domain[도메인 레이어<br/>Entity + Repository]
-        Infrastructure[인프라 레이어<br/>Database]
+    subgraph "개선된 DDD 레이어 구조"
+        Presentation[🎯 Presentation Layer<br/>Controller]
+        Application[📋 Application Layer<br/>Service + DTO]
+        Domain[🏛️ Domain Layer<br/>Entity + DomainService + Event]
+        Infrastructure[🏗️ Infrastructure Layer<br/>Repository + External]
+        Common[🔧 Common Layer<br/>Exception + Config + Util]
     end
     
-    Interface --> Application
+    Presentation --> Application
     Application --> Domain
     Domain --> Infrastructure
+    Application --> Common
+    Domain --> Common
     
     subgraph "각 레이어의 책임"
-        Interface --> I_Resp[요청/응답 처리<br/>API 엔드포인트]
-        Application --> A_Resp[비즈니스 로직<br/>트랜잭션 관리]
-        Domain --> D_Resp[도메인 모델<br/>비즈니스 규칙]
-        Infrastructure --> Inf_Resp[데이터 저장<br/>외부 시스템 연동]
+        Presentation --> P_Resp[REST API 엔드포인트<br/>요청/응답 처리<br/>API 문서화]
+        Application --> A_Resp[애플리케이션 로직<br/>트랜잭션 관리<br/>DTO 변환]
+        Domain --> D_Resp[도메인 모델<br/>비즈니스 규칙<br/>도메인 이벤트]
+        Infrastructure --> I_Resp[데이터 접근<br/>외부 시스템 연동<br/>메시징]
+        Common --> C_Resp[공통 기능<br/>예외 처리<br/>설정 관리<br/>유틸리티]
     end
 ```
+
+### 주요 개선사항
+
+#### 1. **명확한 계층 분리**
+- **Presentation Layer**: REST API 컨트롤러와 요청/응답 처리
+- **Application Layer**: 애플리케이션 서비스와 트랜잭션 관리
+- **Domain Layer**: 도메인 엔티티, 도메인 서비스, 도메인 이벤트
+- **Infrastructure Layer**: 데이터 접근과 외부 시스템 연동
+- **Common Layer**: 공통 기능, 예외 처리, 설정 관리
+
+#### 2. **도메인 서비스 도입**
+- 복잡한 비즈니스 로직을 도메인 서비스로 분리
+- 도메인 규칙 검증과 이벤트 발행 담당
+- 애플리케이션 서비스와 도메인 로직의 명확한 분리
+
+#### 3. **도메인 이벤트 패턴**
+- 도메인 상태 변경 시 이벤트 발행
+- 느슨한 결합과 확장성 향상
+- 이벤트 기반 아키텍처 지원
+
+#### 4. **커스텀 예외 처리**
+- 도메인별 커스텀 예외 클래스
+- 전역 예외 처리기로 일관된 에러 응답
+- 명확한 에러 메시지와 상태 코드
+
+#### 5. **공통 컴포넌트 분리**
+- 검증 로직, 설정, 유틸리티를 공통 패키지로 분리
+- 재사용성과 유지보수성 향상
+- 일관된 코드 스타일과 패턴
 
 ---
 
@@ -203,69 +256,159 @@ discovery-service/
 
 ## 📢 4. Campaign Service
 
-### Campaign Service 구조 다이어그램
+### Campaign Service 구조 다이어그램 (개선된 구조)
 
 ```mermaid
 graph TB
-    subgraph "Campaign Service (:8081)"
-        C_Controller[CampaignController<br/>인터페이스 레이어]
-        C_Service[CampaignService<br/>애플리케이션 레이어]
-        C_Entity[Campaign<br/>도메인 엔티티]
-        C_Repo[CampaignRepository<br/>인프라 레이어]
+    subgraph "Campaign Service (:8081) - 개선된 구조"
+        C_Controller[CampaignController<br/>🎯 Presentation Layer]
+        C_AppService[CampaignService<br/>📋 Application Layer]
+        C_DomainService[CampaignDomainService<br/>🏛️ Domain Layer]
+        C_Entity[Campaign<br/>🏛️ Domain Entity]
+        C_Repo[CampaignRepository<br/>🏗️ Infrastructure Layer]
+        C_Events[Domain Events<br/>🏛️ CampaignCreatedEvent<br/>CampaignStatusChangedEvent]
+        C_Exceptions[Custom Exceptions<br/>🔧 CampaignNotFoundException<br/>CampaignValidationException]
     end
     
-    C_Controller --> C_Service
-    C_Service --> C_Entity
-    C_Service --> C_Repo
+    C_Controller --> C_AppService
+    C_AppService --> C_DomainService
+    C_DomainService --> C_Entity
+    C_DomainService --> C_Repo
+    C_DomainService --> C_Events
+    C_AppService --> C_Exceptions
+    C_DomainService --> C_Exceptions
     C_Repo --> CampaignDB[(Campaign DB)]
     
     subgraph "Campaign 도메인 모델"
         C_Entity --> C_Status[CampaignStatus<br/>DRAFT, ACTIVE, PAUSED,<br/>COMPLETED, CANCELLED]
         C_Entity --> C_Type[CampaignType<br/>DISPLAY, VIDEO, NATIVE,<br/>SEARCH, SOCIAL]
     end
+    
+    subgraph "개선된 기능"
+        C_Events --> Event_Resp[도메인 이벤트 발행<br/>느슨한 결합]
+        C_Exceptions --> Exception_Resp[커스텀 예외 처리<br/>명확한 에러 메시지]
+        C_DomainService --> Domain_Resp[도메인 로직 분리<br/>비즈니스 규칙 검증]
+    end
 ```
 
-### Campaign Service 실행 흐름
+### Campaign Service 실행 흐름 (개선된 구조)
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Gateway as API Gateway
-    participant Campaign as Campaign Service
+    participant Controller as CampaignController
+    participant AppService as CampaignService
+    participant DomainService as CampaignDomainService
+    participant Repository as CampaignRepository
     participant DB as Campaign DB
+    participant EventPublisher as EventPublisher
     
     Client->>Gateway: POST /api/campaigns
-    Gateway->>Campaign: 라우팅
-    Campaign->>Campaign: CampaignController
-    Campaign->>Campaign: CampaignService.createCampaign()
-    Campaign->>Campaign: Campaign 엔티티 생성
-    Campaign->>DB: CampaignRepository.save()
-    DB-->>Campaign: 저장된 Campaign
-    Campaign->>Campaign: CampaignResponse 변환
-    Campaign-->>Gateway: CampaignResponse
+    Gateway->>Controller: 라우팅
+    Controller->>AppService: createCampaign(request)
+    AppService->>AppService: Campaign 엔티티 생성
+    AppService->>DomainService: createCampaign(campaign)
+    DomainService->>DomainService: 비즈니스 규칙 검증
+    DomainService->>Repository: save(campaign)
+    Repository->>DB: INSERT
+    DB-->>Repository: 저장된 Campaign
+    DomainService->>EventPublisher: publishEvent(CampaignCreatedEvent)
+    DomainService-->>AppService: Campaign
+    AppService->>AppService: CampaignResponse 변환
+    AppService-->>Controller: CampaignResponse
+    Controller-->>Gateway: 201 Created
     Gateway-->>Client: 201 Created
 ```
 
-### Campaign Service 구조
+### 주요 개선사항
+
+#### 1. **패키지 네이밍 개선**
+- `interfaces` → `presentation`: 더 직관적인 네이밍
+- `config` → `common/config`: 공통 설정 관리
+- `domain/repository` → `infrastructure/repository`: 인프라 계층 분리
+
+#### 2. **도메인 서비스 도입**
+- 복잡한 비즈니스 로직을 `CampaignDomainService`로 분리
+- 도메인 규칙 검증 및 이벤트 발행 담당
+
+#### 3. **도메인 이벤트 패턴**
+- `CampaignCreatedEvent`: 캠페인 생성 시 이벤트 발행
+- `CampaignStatusChangedEvent`: 상태 변경 시 이벤트 발행
+- 느슨한 결합과 확장성 향상
+
+#### 4. **커스텀 예외 처리**
+- `CampaignNotFoundException`: 리소스 없음 예외
+- `CampaignValidationException`: 검증 실패 예외
+- `GlobalExceptionHandler`: 전역 예외 처리
+
+#### 5. **공통 유틸리티**
+- `CampaignValidator`: 검증 로직 중앙화
+- 재사용 가능한 검증 규칙 제공
+
+### Campaign Service 구조 (개선된 DDD 패턴)
+
 ```
 campaign-service/
 ├── src/main/java/com/example/campaign/
-│   ├── CampaignServiceApplication.java
-│   ├── domain/
-│   │   ├── Campaign.java                    # 도메인 엔티티
-│   │   └── repository/
-│   │       └── CampaignRepository.java      # 리포지토리 인터페이스
-│   ├── application/
+│   ├── CampaignServiceApplication.java      # 애플리케이션 진입점
+│   ├── presentation/                        # 🎯 프레젠테이션 레이어
+│   │   └── CampaignController.java          # REST API 컨트롤러
+│   ├── application/                         # 📋 애플리케이션 레이어
 │   │   ├── dto/
 │   │   │   ├── CreateCampaignRequest.java   # 요청 DTO
 │   │   │   └── CampaignResponse.java        # 응답 DTO
 │   │   └── service/
 │   │       └── CampaignService.java         # 애플리케이션 서비스
-│   └── interfaces/
-│       └── CampaignController.java          # REST 컨트롤러
+│   ├── domain/                              # 🏛️ 도메인 레이어
+│   │   ├── Campaign.java                    # 도메인 엔티티
+│   │   ├── service/
+│   │   │   └── CampaignDomainService.java   # 도메인 서비스
+│   │   └── event/                           # 도메인 이벤트
+│   │       ├── CampaignCreatedEvent.java
+│   │       └── CampaignStatusChangedEvent.java
+│   ├── infrastructure/                      # 🏗️ 인프라스트럭처 레이어
+│   │   └── repository/
+│   │       └── CampaignRepository.java      # JPA 리포지토리
+│   └── common/                              # 🔧 공통 컴포넌트
+│       ├── config/
+│       │   └── OpenApiConfig.java           # OpenAPI 설정
+│       ├── exception/                       # 커스텀 예외
+│       │   ├── CampaignNotFoundException.java
+│       │   ├── CampaignValidationException.java
+│       │   └── GlobalExceptionHandler.java  # 전역 예외 처리
+│       └── util/
+│           └── CampaignValidator.java       # 검증 유틸리티
 ├── src/main/resources/
 │   └── application.yml                      # 설정 파일
 └── pom.xml                                  # Maven 의존성
+```
+
+### 개선된 DDD 아키텍처 패턴
+
+```mermaid
+graph TB
+    subgraph "Campaign Service - 개선된 DDD 구조"
+        Presentation[🎯 Presentation Layer<br/>CampaignController]
+        Application[📋 Application Layer<br/>CampaignService]
+        Domain[🏛️ Domain Layer<br/>Campaign + DomainService]
+        Infrastructure[🏗️ Infrastructure Layer<br/>CampaignRepository]
+        Common[🔧 Common Layer<br/>Exception + Config + Util]
+    end
+    
+    Presentation --> Application
+    Application --> Domain
+    Domain --> Infrastructure
+    Application --> Common
+    Domain --> Common
+    
+    subgraph "각 레이어의 책임"
+        Presentation --> P_Resp[REST API 엔드포인트<br/>요청/응답 처리]
+        Application --> A_Resp[애플리케이션 로직<br/>트랜잭션 관리]
+        Domain --> D_Resp[도메인 모델<br/>비즈니스 규칙<br/>도메인 이벤트]
+        Infrastructure --> I_Resp[데이터 접근<br/>외부 시스템 연동]
+        Common --> C_Resp[공통 기능<br/>예외 처리<br/>설정 관리]
+    end
 ```
 
 **역할**: 광고 캠페인을 관리하며, 캠페인 생성, 조회, 상태 변경, 예산 관리 등의 기능을 제공합니다.
@@ -296,44 +439,68 @@ graph TB
     end
 ```
 
-### Ad Service 실행 흐름
+### Ad Service 실행 흐름 (개선된 구조)
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Gateway as API Gateway
-    participant Ad as Ad Service
+    participant Controller as AdController
+    participant AppService as AdvertisementService
+    participant DomainService as AdvertisementDomainService
+    participant Repository as AdvertisementRepository
     participant DB as Ad DB
+    participant EventPublisher as EventPublisher
     
     Client->>Gateway: POST /api/ads
-    Gateway->>Ad: 라우팅
-    Ad->>Ad: AdController
-    Ad->>Ad: AdvertisementService.createAd()
-    Ad->>Ad: Advertisement 엔티티 생성
-    Ad->>DB: AdvertisementRepository.save()
-    DB-->>Ad: 저장된 Advertisement
-    Ad->>Ad: AdvertisementResponse 변환
-    Ad-->>Gateway: AdvertisementResponse
+    Gateway->>Controller: 라우팅
+    Controller->>AppService: createAd(request)
+    AppService->>AppService: Advertisement 엔티티 생성
+    AppService->>DomainService: createAdvertisement(advertisement)
+    DomainService->>DomainService: 비즈니스 규칙 검증
+    DomainService->>Repository: save(advertisement)
+    Repository->>DB: INSERT
+    DB-->>Repository: 저장된 Advertisement
+    DomainService->>EventPublisher: publishEvent(AdvertisementCreatedEvent)
+    DomainService-->>AppService: Advertisement
+    AppService->>AppService: AdvertisementResponse 변환
+    AppService-->>Controller: AdvertisementResponse
+    Controller-->>Gateway: 201 Created
     Gateway-->>Client: 201 Created
 ```
 
-### Ad Service 구조
+### Ad Service 구조 (개선된 DDD 패턴)
+
 ```
 ad-service/
 ├── src/main/java/com/example/ad/
-│   ├── AdServiceApplication.java
-│   ├── domain/
-│   │   ├── Advertisement.java               # 도메인 엔티티
-│   │   └── repository/
-│   │       └── AdvertisementRepository.java # 리포지토리 인터페이스
-│   ├── application/
+│   ├── AdServiceApplication.java            # 애플리케이션 진입점
+│   ├── presentation/                        # 🎯 프레젠테이션 레이어
+│   │   └── AdController.java                # REST API 컨트롤러
+│   ├── application/                         # 📋 애플리케이션 레이어
 │   │   ├── dto/
 │   │   │   ├── AdvertisementRequest.java    # 요청 DTO
 │   │   │   └── AdvertisementResponse.java   # 응답 DTO
 │   │   └── service/
 │   │       └── AdvertisementService.java    # 애플리케이션 서비스
-│   └── interfaces/
-│       └── AdController.java                # REST 컨트롤러
+│   ├── domain/                              # 🏛️ 도메인 레이어
+│   │   ├── Advertisement.java               # 도메인 엔티티
+│   │   ├── service/
+│   │   │   └── AdvertisementDomainService.java # 도메인 서비스
+│   │   └── event/                           # 도메인 이벤트
+│   │       ├── AdvertisementCreatedEvent.java
+│   │       └── AdvertisementStatusChangedEvent.java
+│   ├── infrastructure/                      # 🏗️ 인프라스트럭처 레이어
+│   │   └── repository/
+│   │       └── AdvertisementRepository.java # JPA 리포지토리
+│   └── common/                              # 🔧 공통 컴포넌트
+│       ├── config/
+│       │   └── OpenApiConfig.java           # OpenAPI 설정
+│       ├── exception/                       # 커스텀 예외
+│       │   ├── AdvertisementNotFoundException.java
+│       │   └── AdvertisementValidationException.java
+│       └── util/
+│           └── AdvertisementValidator.java  # 검증 유틸리티
 ├── src/main/resources/
 │   └── application.yml                      # 설정 파일
 └── pom.xml                                  # Maven 의존성
@@ -345,23 +512,38 @@ ad-service/
 
 ## 👥 6. Publisher Service
 
-### Publisher Service 구조
+### Publisher Service 구조 (개선된 DDD 패턴)
+
 ```
 publisher-service/
 ├── src/main/java/com/example/publisher/
-│   ├── PublisherServiceApplication.java
-│   ├── domain/
-│   │   ├── Publisher.java                   # 도메인 엔티티
-│   │   └── repository/
-│   │       └── PublisherRepository.java     # 리포지토리 인터페이스
-│   ├── application/
+│   ├── PublisherServiceApplication.java     # 애플리케이션 진입점
+│   ├── presentation/                        # 🎯 프레젠테이션 레이어
+│   │   └── PublisherController.java         # REST API 컨트롤러
+│   ├── application/                         # 📋 애플리케이션 레이어
 │   │   ├── dto/
 │   │   │   ├── PublisherRequest.java        # 요청 DTO
 │   │   │   └── PublisherResponse.java       # 응답 DTO
 │   │   └── service/
 │   │       └── PublisherService.java        # 애플리케이션 서비스
-│   └── interfaces/
-│       └── PublisherController.java         # REST 컨트롤러
+│   ├── domain/                              # 🏛️ 도메인 레이어
+│   │   ├── Publisher.java                   # 도메인 엔티티
+│   │   ├── service/
+│   │   │   └── PublisherDomainService.java  # 도메인 서비스
+│   │   └── event/                           # 도메인 이벤트
+│   │       ├── PublisherCreatedEvent.java
+│   │       └── PublisherStatusChangedEvent.java
+│   ├── infrastructure/                      # 🏗️ 인프라스트럭처 레이어
+│   │   └── repository/
+│   │       └── PublisherRepository.java     # JPA 리포지토리
+│   └── common/                              # 🔧 공통 컴포넌트
+│       ├── config/
+│       │   └── OpenApiConfig.java           # OpenAPI 설정
+│       ├── exception/                       # 커스텀 예외
+│       │   ├── PublisherNotFoundException.java
+│       │   └── PublisherValidationException.java
+│       └── util/
+│           └── PublisherValidator.java      # 검증 유틸리티
 ├── src/main/resources/
 │   └── application.yml                      # 설정 파일
 └── pom.xml                                  # Maven 의존성
@@ -373,23 +555,38 @@ publisher-service/
 
 ## 👤 7. User Service
 
-### User Service 구조
+### User Service 구조 (개선된 DDD 패턴)
+
 ```
 user-service/
 ├── src/main/java/com/example/user/
-│   ├── UserServiceApplication.java
-│   ├── domain/
-│   │   ├── User.java                        # 도메인 엔티티
-│   │   └── repository/
-│   │       └── UserRepository.java          # 리포지토리 인터페이스
-│   ├── application/
+│   ├── UserServiceApplication.java          # 애플리케이션 진입점
+│   ├── presentation/                        # 🎯 프레젠테이션 레이어
+│   │   └── UserController.java              # REST API 컨트롤러
+│   ├── application/                         # 📋 애플리케이션 레이어
 │   │   ├── dto/
 │   │   │   ├── CreateUserRequest.java       # 요청 DTO
 │   │   │   └── UserResponse.java            # 응답 DTO
 │   │   └── service/
 │   │       └── UserService.java             # 애플리케이션 서비스
-│   └── interfaces/
-│       └── UserController.java              # REST 컨트롤러
+│   ├── domain/                              # 🏛️ 도메인 레이어
+│   │   ├── User.java                        # 도메인 엔티티
+│   │   ├── service/
+│   │   │   └── UserDomainService.java       # 도메인 서비스
+│   │   └── event/                           # 도메인 이벤트
+│   │       ├── UserCreatedEvent.java
+│   │       └── UserStatusChangedEvent.java
+│   ├── infrastructure/                      # 🏗️ 인프라스트럭처 레이어
+│   │   └── repository/
+│   │       └── UserRepository.java          # JPA 리포지토리
+│   └── common/                              # 🔧 공통 컴포넌트
+│       ├── config/
+│       │   └── OpenApiConfig.java           # OpenAPI 설정
+│       ├── exception/                       # 커스텀 예외
+│       │   ├── UserNotFoundException.java
+│       │   └── UserValidationException.java
+│       └── util/
+│           └── UserValidator.java           # 검증 유틸리티
 ├── src/main/resources/
 │   └── application.yml                      # 설정 파일
 └── pom.xml                                  # Maven 의존성

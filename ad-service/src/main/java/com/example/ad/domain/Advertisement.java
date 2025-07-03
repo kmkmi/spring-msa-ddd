@@ -90,4 +90,22 @@ public class Advertisement {
     public enum AdStatus {
         DRAFT, ACTIVE, PAUSED, COMPLETED, REJECTED
     }
+    
+    /**
+     * 광고 상태 업데이트
+     */
+    public void updateStatus(AdStatus newStatus) {
+        this.status = newStatus;
+    }
+    
+    /**
+     * 광고 메트릭 업데이트
+     */
+    public void updateMetrics(Long impressions, Long clicks, Double ctr) {
+        this.impressions = impressions;
+        this.clicks = clicks;
+        if (ctr != null) {
+            this.ctr = BigDecimal.valueOf(ctr);
+        }
+    }
 } 

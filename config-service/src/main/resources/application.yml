@@ -3,6 +3,8 @@ spring:
     active: native
   application:
     name: config-service
+  config:
+    import: "optional:native:classpath:/config/"
   cloud:
     config:
       server:

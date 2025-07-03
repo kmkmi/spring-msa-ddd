@@ -2,9 +2,6 @@
 spring:
   cloud:
     kubernetes:
-      discovery:
-        enabled: true
-        all-namespaces: false
       config:
         enabled: true
         sources:
