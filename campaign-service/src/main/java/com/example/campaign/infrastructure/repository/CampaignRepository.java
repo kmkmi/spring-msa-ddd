@@ -16,6 +16,8 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     
     Page<Campaign> findByPublisherId(Long publisherId, Pageable pageable);
     
+    List<Campaign> findByPublisherId(Long publisherId);
+    
     List<Campaign> findByStatus(Campaign.CampaignStatus status);
     
     List<Campaign> findByCampaignType(Campaign.CampaignType campaignType);

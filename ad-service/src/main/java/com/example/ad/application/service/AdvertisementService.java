@@ -4,7 +4,9 @@ import com.example.ad.domain.Advertisement;
 import com.example.ad.infrastructure.repository.AdvertisementRepository;
 import com.example.ad.application.dto.AdvertisementRequest;
 import com.example.ad.application.dto.AdvertisementResponse;
+import com.example.ad.common.exception.AdvertisementNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -12,80 +14,108 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdvertisementService {
     private final AdvertisementRepository repository;
 
     @Transactional
-    public AdvertisementResponse createAd(AdvertisementRequest req) {
-        Advertisement ad = Advertisement.builder()
-                .campaignId(req.getCampaignId())
-                .title(req.getTitle())
-                .description(req.getDescription())
-                .imageUrl(req.getImageUrl())
-                .videoUrl(req.getVideoUrl())
-                .landingPageUrl(req.getLandingPageUrl())
-                .adType(req.getAdType() != null ? Advertisement.AdType.valueOf(req.getAdType()) : Advertisement.AdType.BANNER)
-                .status(req.getStatus() != null ? Advertisement.AdStatus.valueOf(req.getStatus()) : Advertisement.AdStatus.DRAFT)
-                .bidAmount(req.getBidAmount() != null ? java.math.BigDecimal.valueOf(req.getBidAmount()) : null)
-                .dailyBudget(req.getDailyBudget() != null ? java.math.BigDecimal.valueOf(req.getDailyBudget()) : null)
-                .totalSpent(req.getTotalSpent() != null ? java.math.BigDecimal.valueOf(req.getTotalSpent()) : null)
-                .impressions(req.getImpressions())
-                .clicks(req.getClicks())
-                .ctr(req.getCtr() != null ? java.math.BigDecimal.valueOf(req.getCtr()) : null)
-                .startDate(req.getStartDate() != null ? java.time.LocalDateTime.parse(req.getStartDate()) : null)
-                .endDate(req.getEndDate() != null ? java.time.LocalDateTime.parse(req.getEndDate()) : null)
+    public AdvertisementResponse createAd(AdvertisementRequest request) {
+        log.info("Creating advertisement for campaign: {}", request.getCampaignId());
+        
+        Advertisement advertisement = Advertisement.builder()
+                .campaignId(request.getCampaignId())
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .imageUrl(request.getImageUrl())
+                .videoUrl(request.getVideoUrl())
+                .landingPageUrl(request.getLandingPageUrl())
+                .adType(request.getAdType() != null ? Advertisement.AdType.valueOf(request.getAdType()) : Advertisement.AdType.BANNER)
+                .status(request.getStatus() != null ? Advertisement.AdStatus.valueOf(request.getStatus()) : Advertisement.AdStatus.DRAFT)
+                .bidAmount(request.getBidAmount() != null ? java.math.BigDecimal.valueOf(request.getBidAmount()) : null)
+                .dailyBudget(request.getDailyBudget() != null ? java.math.BigDecimal.valueOf(request.getDailyBudget()) : null)
+                .totalSpent(request.getTotalSpent() != null ? java.math.BigDecimal.valueOf(request.getTotalSpent()) : null)
+                .impressions(request.getImpressions())
+                .clicks(request.getClicks())
+                .ctr(request.getCtr() != null ? java.math.BigDecimal.valueOf(request.getCtr()) : null)
+                .startDate(request.getStartDate() != null ? java.time.LocalDateTime.parse(request.getStartDate()) : null)
+                .endDate(request.getEndDate() != null ? java.time.LocalDateTime.parse(request.getEndDate()) : null)
                 .build();
-        Advertisement saved = repository.save(ad);
-        return toResponse(saved);
+        
+        Advertisement savedAdvertisement = repository.save(advertisement);
+        log.info("Advertisement created with id: {}", savedAdvertisement.getId());
+        
+        return toResponse(savedAdvertisement);
     }
 
     @Transactional(readOnly = true)
     public AdvertisementResponse getAd(Long id) {
-        return repository.findById(id).map(this::toResponse).orElse(null);
+        log.info("Getting advertisement by id: {}", id);
+        
+        return repository.findById(id)
+                .map(this::toResponse)
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)
     public List<AdvertisementResponse> getAdsByCampaign(Long campaignId) {
-        return repository.findByCampaignId(campaignId).stream().map(this::toResponse).collect(Collectors.toList());
+        log.info("Getting advertisements by campaign id: {}", campaignId);
+        
+        return repository.findByCampaignId(campaignId)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public AdvertisementResponse updateStatus(Long id, String status) {
-        Advertisement ad = repository.findById(id).orElseThrow();
+        log.info("Updating advertisement status for id: {} to: {}", id, status);
+        
+        Advertisement advertisement = repository.findById(id)
+                .orElseThrow(() -> new AdvertisementNotFoundException(id));
+        
         if (status != null) {
-            ad.setStatus(Advertisement.AdStatus.valueOf(status));
+            advertisement.setStatus(Advertisement.AdStatus.valueOf(status));
         }
-        return toResponse(repository.save(ad));
+        
+        Advertisement updatedAdvertisement = repository.save(advertisement);
+        return toResponse(updatedAdvertisement);
     }
 
     @Transactional
     public AdvertisementResponse updateMetrics(Long id, Long impressions, Long clicks, Double ctr) {
-        Advertisement ad = repository.findById(id).orElseThrow();
-        ad.setImpressions(impressions);
-        ad.setClicks(clicks);
-        ad.setCtr(ctr != null ? java.math.BigDecimal.valueOf(ctr) : null);
-        return toResponse(repository.save(ad));
+        log.info("Updating advertisement metrics for id: {} - impressions: {}, clicks: {}, ctr: {}", 
+                id, impressions, clicks, ctr);
+        
+        Advertisement advertisement = repository.findById(id)
+                .orElseThrow(() -> new AdvertisementNotFoundException(id));
+        
+        advertisement.setImpressions(impressions);
+        advertisement.setClicks(clicks);
+        advertisement.setCtr(ctr != null ? java.math.BigDecimal.valueOf(ctr) : null);
+        
+        Advertisement updatedAdvertisement = repository.save(advertisement);
+        return toResponse(updatedAdvertisement);
     }
 
-    private AdvertisementResponse toResponse(Advertisement ad) {
+    private AdvertisementResponse toResponse(Advertisement advertisement) {
         return AdvertisementResponse.builder()
-                .id(ad.getId())
-                .campaignId(ad.getCampaignId())
-                .title(ad.getTitle())
-                .description(ad.getDescription())
-                .imageUrl(ad.getImageUrl())
-                .videoUrl(ad.getVideoUrl())
-                .landingPageUrl(ad.getLandingPageUrl())
-                .adType(ad.getAdType().name())
-                .status(ad.getStatus().name())
-                .bidAmount(ad.getBidAmount() != null ? ad.getBidAmount().doubleValue() : null)
-                .dailyBudget(ad.getDailyBudget() != null ? ad.getDailyBudget().doubleValue() : null)
-                .totalSpent(ad.getTotalSpent() != null ? ad.getTotalSpent().doubleValue() : null)
-                .impressions(ad.getImpressions())
-                .clicks(ad.getClicks())
-                .ctr(ad.getCtr() != null ? ad.getCtr().doubleValue() : null)
-                .startDate(ad.getStartDate() != null ? ad.getStartDate().toString() : null)
-                .endDate(ad.getEndDate() != null ? ad.getEndDate().toString() : null)
+                .id(advertisement.getId())
+                .campaignId(advertisement.getCampaignId())
+                .title(advertisement.getTitle())
+                .description(advertisement.getDescription())
+                .imageUrl(advertisement.getImageUrl())
+                .videoUrl(advertisement.getVideoUrl())
+                .landingPageUrl(advertisement.getLandingPageUrl())
+                .adType(advertisement.getAdType().name())
+                .status(advertisement.getStatus().name())
+                .bidAmount(advertisement.getBidAmount() != null ? advertisement.getBidAmount().doubleValue() : null)
+                .dailyBudget(advertisement.getDailyBudget() != null ? advertisement.getDailyBudget().doubleValue() : null)
+                .totalSpent(advertisement.getTotalSpent() != null ? advertisement.getTotalSpent().doubleValue() : null)
+                .impressions(advertisement.getImpressions())
+                .clicks(advertisement.getClicks())
+                .ctr(advertisement.getCtr() != null ? advertisement.getCtr().doubleValue() : null)
+                .startDate(advertisement.getStartDate() != null ? advertisement.getStartDate().toString() : null)
+                .endDate(advertisement.getEndDate() != null ? advertisement.getEndDate().toString() : null)
                 .build();
     }
 } 

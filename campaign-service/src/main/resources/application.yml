@@ -14,50 +14,25 @@ spring:
     kubernetes:
       discovery:
         enabled: true
-    consul:
-      host: consul
-      port: 8500
-      discovery:
-        enabled: true
-        service-name: campaign-service
-        health-check-path: /campaigns/health
-        health-check-interval: 15s
-        prefer-ip-address: true
-        hostname: campaign-service
-  datasource:
-    url: jdbc:mysql://campaign-db:3306/campaign_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false&autocommit=false
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      connection-test-query: SELECT 1
-      auto-commit: false
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        format_sql: true
-        connection:
-          provider_disables_autocommit: true
-        autocommit: false
-      hibernate.connection.autocommit: false
-  sql:
-    init:
-      mode: always
-      continue-on-error: true
+    fail-fast: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+  main:
+    web-application-type: servlet
+
+# JWT 설정
+jwt:
+  secret: your-super-secret-jwt-key-for-advertising-msa-2024
+  expiration: 86400000  # 24시간 (밀리초)
+  refresh-expiration: 604800000  # 7일 (밀리초)
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
 
 # Swagger UI 설정
 springdoc:
-  api-docs:
-    path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
     operations-sorter: method

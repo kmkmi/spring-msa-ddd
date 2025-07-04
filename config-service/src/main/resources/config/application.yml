@@ -7,6 +7,9 @@ spring:
         sources:
           - namespace: default
             name: config-service
+    consul:
+      host: consul
+      port: 8500
 
 management:
   endpoints:

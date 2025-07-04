@@ -1,7 +1,6 @@
 package com.example.user.presentation;
 
 import com.example.user.application.dto.CreateUserRequest;
-import com.example.user.application.dto.UserResponse;
 import com.example.user.application.service.UserService;
 import com.example.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,96 +24,95 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "User", description = "사용자 관리 API")
+@Tag(name = "User Management", description = "사용자 관리 API")
 public class UserController {
     
     private final UserService userService;
     
+    @GetMapping("/health")
+    @Operation(summary = "헬스 체크", description = "서비스 상태를 확인합니다.")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("User Service is healthy");
+    }
+
     @PostMapping
-    @Operation(summary = "사용자 생성", description = "새로운 사용자를 등록합니다.")
+    @Operation(summary = "사용자 생성", description = "새로운 사용자를 생성합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "사용자 생성 성공",
-            content = @Content(schema = @Schema(implementation = UserResponse.class))),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
-        @ApiResponse(responseCode = "409", description = "이미 존재하는 이메일"),
-        @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            content = @Content(schema = @Schema(implementation = User.UserResponse.class))),
+        @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+        @ApiResponse(responseCode = "409", description = "이미 존재하는 이메일")
     })
-    public ResponseEntity<UserResponse> createUser(
-            @Parameter(description = "사용자 생성 요청 데이터", required = true)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User.UserResponse> createUser(
+            @Parameter(description = "사용자 생성 요청", required = true)
             @Valid @RequestBody CreateUserRequest request) {
-        log.info("Received request to create user: {}", request.getEmail());
-        UserResponse response = userService.createUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        
+        log.info("Creating user with email: {}", request.getEmail());
+        User.UserResponse userResponse = userService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
-    
+
     @GetMapping("/{id}")
-    @Operation(summary = "사용자 조회", description = "ID로 특정 사용자를 조회합니다.")
+    @Operation(summary = "사용자 조회", description = "ID로 사용자를 조회합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "사용자 조회 성공",
-            content = @Content(schema = @Schema(implementation = UserResponse.class))),
-        @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
-        @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            content = @Content(schema = @Schema(implementation = User.UserResponse.class))),
+        @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
-    public ResponseEntity<UserResponse> getUserById(
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User.UserResponse> getUserById(
             @Parameter(description = "사용자 ID", required = true)
             @PathVariable Long id) {
-        log.info("Received request to get user by id: {}", id);
-        UserResponse response = userService.getUserById(id);
-        return ResponseEntity.ok(response);
+        
+        log.info("Getting user by id: {}", id);
+        User.UserResponse userResponse = userService.getUserById(id);
+        return ResponseEntity.ok(userResponse);
     }
-    
-    @GetMapping("/email/{email}")
-    @Operation(summary = "이메일로 사용자 조회", description = "이메일로 특정 사용자를 조회합니다.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "사용자 조회 성공",
-            content = @Content(schema = @Schema(implementation = UserResponse.class))),
-        @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
-        @ApiResponse(responseCode = "500", description = "서버 내부 오류")
-    })
-    public ResponseEntity<UserResponse> getUserByEmail(
-            @Parameter(description = "사용자 이메일", required = true)
-            @PathVariable String email) {
-        log.info("Received request to get user by email: {}", email);
-        UserResponse response = userService.getUserByEmail(email);
-        return ResponseEntity.ok(response);
-    }
-    
+
     @GetMapping
-    @Operation(summary = "전체 사용자 조회", description = "등록된 모든 사용자 목록을 조회합니다.")
+    @Operation(summary = "모든 사용자 조회", description = "모든 사용자 목록을 조회합니다.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "사용자 목록 조회 성공"),
-        @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+        @ApiResponse(responseCode = "200", description = "사용자 목록 조회 성공",
+            content = @Content(schema = @Schema(implementation = User.UserResponse.class)))
     })
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        log.info("Received request to get all users");
-        List<UserResponse> response = userService.getAllUsers();
-        return ResponseEntity.ok(response);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<User.UserResponse>> getAllUsers() {
+        log.info("Getting all users");
+        List<User.UserResponse> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
-    
+
     @PutMapping("/{id}/status")
     @Operation(summary = "사용자 상태 변경", description = "사용자의 상태를 변경합니다.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "사용자 상태 변경 성공",
-            content = @Content(schema = @Schema(implementation = UserResponse.class))),
-        @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
-        @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+        @ApiResponse(responseCode = "200", description = "상태 변경 성공"),
+        @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
-    public ResponseEntity<UserResponse> updateUserStatus(
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User.UserResponse> updateUserStatus(
             @Parameter(description = "사용자 ID", required = true)
             @PathVariable Long id,
-            @Parameter(description = "변경할 사용자 상태", required = true)
+            @Parameter(description = "새로운 상태", required = true)
             @RequestParam User.UserStatus status) {
-        log.info("Received request to update user status for id: {} to: {}", id, status);
-        UserResponse response = userService.updateUserStatus(id, status);
-        return ResponseEntity.ok(response);
+        
+        log.info("Updating user status for id: {} to: {}", id, status);
+        User.UserResponse userResponse = userService.updateUserStatus(id, status);
+        return ResponseEntity.ok(userResponse);
     }
-    
-    @GetMapping("/health")
-    @Operation(summary = "헬스 체크", description = "서비스 상태를 확인합니다.")
+
+    @GetMapping("/email/{email}")
+    @Operation(summary = "이메일로 사용자 조회", description = "이메일로 사용자를 조회합니다.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "서비스 정상 동작")
+        @ApiResponse(responseCode = "200", description = "사용자 조회 성공",
+            content = @Content(schema = @Schema(implementation = User.UserResponse.class))),
+        @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("User Service is healthy");
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User.UserResponse> getUserByEmail(@PathVariable String email) {
+        log.info("Getting user by email: {}", email);
+        User.UserResponse userResponse = userService.getUserByEmail(email);
+        return ResponseEntity.ok(userResponse);
     }
 } 

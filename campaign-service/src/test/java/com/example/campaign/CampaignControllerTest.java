@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -49,6 +50,7 @@ public class CampaignControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PUBLISHER")
     void testCreateCampaign() throws Exception {
         CreateCampaignRequest request = CreateCampaignRequest.builder()
                 .name("Test Campaign")
@@ -71,6 +73,7 @@ public class CampaignControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PUBLISHER")
     void testCreateCampaignValidation() throws Exception {
         CreateCampaignRequest request = CreateCampaignRequest.builder()
                 .name("")
@@ -85,6 +88,7 @@ public class CampaignControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADVERTISER")
     void testGetCampaignById() throws Exception {
         // First create a campaign
         CreateCampaignRequest request = CreateCampaignRequest.builder()
@@ -108,6 +112,7 @@ public class CampaignControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PUBLISHER")
     void testGetCampaignsByPublisherId() throws Exception {
         // First create a campaign
         CreateCampaignRequest request = CreateCampaignRequest.builder()
@@ -126,7 +131,7 @@ public class CampaignControllerTest {
 
         mockMvc.perform(get("/campaigns/publisher/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray());
+                .andExpect(jsonPath("$").isArray());
     }
 
     @Test
@@ -174,6 +179,7 @@ public class CampaignControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PUBLISHER")
     void testUpdateCampaignStatus() throws Exception {
         // First create a campaign
         CreateCampaignRequest request = CreateCampaignRequest.builder()
@@ -222,6 +228,7 @@ public class CampaignControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADVERTISER")
     void testGetNonExistentCampaign() throws Exception {
         mockMvc.perform(get("/campaigns/999"))
                 .andExpect(status().isNotFound());

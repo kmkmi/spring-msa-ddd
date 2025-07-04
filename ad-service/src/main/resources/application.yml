@@ -6,6 +6,7 @@ spring:
     name: ad-service
   config:
     import: optional:configserver:http://config-service:8888
+    fail-fast: true
   cloud:
     compatibility-verifier:
       enabled: false
@@ -14,7 +15,6 @@ spring:
     kubernetes:
       discovery:
         enabled: true
-        all-namespaces: false
     consul:
       host: consul
       port: 8500
@@ -48,11 +48,24 @@ spring:
     init:
       mode: always
       continue-on-error: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+  main:
+    web-application-type: servlet
+
+# JWT 설정
+jwt:
+  secret: your-super-secret-jwt-key-for-advertising-msa-2024
+  expiration: 86400000  # 24시간 (밀리초)
+  refresh-expiration: 604800000  # 7일 (밀리초)
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
 
 # Swagger UI 설정
 springdoc:
-  api-docs:
-    path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
     operations-sorter: method

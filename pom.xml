@@ -40,6 +40,7 @@
 		<module>publisher-service</module>
 		<module>shared</module>
 		<module>user-service</module>
+		<module>jwks-service</module>
 	</modules>
 
 	<dependencies>

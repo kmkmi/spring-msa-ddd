@@ -24,6 +24,11 @@ spring:
   config:
     activate:
       on-profile: docker
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
 
 management:
   endpoints:

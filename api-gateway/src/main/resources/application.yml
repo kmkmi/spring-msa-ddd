@@ -2,13 +2,23 @@ server:
   port: 8080
 
 spring:
-  application:
-    name: api-gateway
   main:
     web-application-type: reactive
+  application:
+    name: api-gateway
   config:
+    activate:
+      on-profile: '!test'
     import: optional:configserver:http://config-service:8888
   cloud:
+    compatibility-verifier:
+      enabled: false
+    config:
+      uri: http://config-service:8888
+      fail-fast: true
+    kubernetes:
+      discovery:
+        enabled: true
     consul:
       host: consul
       port: 8500
@@ -17,34 +27,62 @@ spring:
         service-name: api-gateway
         health-check-path: /actuator/health
         health-check-interval: 15s
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-    config:
-      uri: http://config-service:8888
-      fail-fast: false
+        prefer-ip-address: true
+        hostname: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+
+# JWT 설정
+jwt:
+  secret: your-super-secret-jwt-key-for-advertising-msa-2024
+  expiration: 86400000  # 24시간 (밀리초)
+  refresh-expiration: 604800000  # 7일 (밀리초)
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
+
+# Swagger UI 설정
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway
+        include: health,info
   endpoint:
     health:
       show-details: always
 
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
-
 ---
+# 테스트 환경에서는 config import를 아예 비활성화
 spring:
   config:
     activate:
-      on-profile: docker
-    import: optional:configserver:http://config-service:8888
-  cloud:
-    config:
-      uri: http://config-service:8888 
+      on-profile: test
+    import: ""
+
+# logging:
+#   level:
+#     org.springframework.cloud.gateway: DEBUG
+#     com.example.gateway: DEBUG
+
+# ---
+# spring:
+#   config:
+#     activate:
+#       on-profile: docker
+#     import: optional:configserver:http://config-service:8888
+#   cloud:
+#     config:
+#       uri: http://config-service:8888 

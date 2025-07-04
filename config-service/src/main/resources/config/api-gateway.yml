@@ -23,6 +23,12 @@ spring:
             - Path=/api/users/**
           filters:
             - StripPrefix=1
+        - id: user-auth
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
         - id: ad-service
           uri: lb://ad-service
           predicates:
@@ -35,6 +41,13 @@ spring:
             - Path=/api/publishers/**
           filters:
             - StripPrefix=1
+        - id: user-service-health
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/health
+          filters:
+            - StripPrefix=1
+spring.security.oauth2.resourceserver.jwt.jwk-set-uri: http://jwks-service:8090/oauth2/jwks
 
 management:
   endpoints:

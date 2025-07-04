@@ -8,8 +8,6 @@ import com.example.campaign.infrastructure.repository.CampaignRepository;
 import com.example.campaign.common.exception.CampaignNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,11 +58,20 @@ public class CampaignService {
         return CampaignResponse.from(campaign);
     }
     
-    public Page<CampaignResponse> getCampaignsByPublisherId(Long publisherId, Pageable pageable) {
+    public List<CampaignResponse> getAllCampaigns() {
+        log.info("Getting all campaigns");
+        
+        return campaignRepository.findAll().stream()
+                .map(CampaignResponse::from)
+                .collect(Collectors.toList());
+    }
+    
+    public List<CampaignResponse> getCampaignsByPublisher(Long publisherId) {
         log.info("Getting campaigns for publisher: {}", publisherId);
         
-        Page<Campaign> campaigns = campaignRepository.findByPublisherId(publisherId, pageable);
-        return campaigns.map(CampaignResponse::from);
+        return campaignRepository.findByPublisherId(publisherId).stream()
+                .map(CampaignResponse::from)
+                .collect(Collectors.toList());
     }
     
     public List<CampaignResponse> getCampaignsByStatus(Campaign.CampaignStatus status) {

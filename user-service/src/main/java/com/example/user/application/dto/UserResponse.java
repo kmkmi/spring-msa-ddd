@@ -16,8 +16,7 @@ public class UserResponse {
     
     private Long id;
     private String email;
-    private String name;
-    private User.UserStatus status;
+    private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
@@ -25,7 +24,6 @@ public class UserResponse {
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .name(user.getName())
                 .status(user.getStatus())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())

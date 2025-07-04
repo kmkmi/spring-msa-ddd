@@ -1,7 +1,7 @@
 package com.example.user;
 
 import com.example.user.application.dto.CreateUserRequest;
-import com.example.user.application.dto.UserResponse;
+import com.example.user.domain.User;
 import com.example.user.application.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -45,26 +46,25 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void testCreateUser() throws Exception {
         CreateUserRequest request = CreateUserRequest.builder()
                 .email("test@example.com")
-                .name("Test User")
                 .password("password123")
+                .role(User.UserRole.USER)
                 .build();
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("test@example.com"))
-                .andExpect(jsonPath("$.name").value("Test User"));
+                .andExpect(jsonPath("$.email").value("test@example.com"));
     }
 
     @Test
     void testCreateUserValidation() throws Exception {
         CreateUserRequest request = CreateUserRequest.builder()
                 .email("invalid-email")
-                .name("")
                 .password("123")
                 .build();
 
@@ -75,6 +75,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void testGetAllUsers() throws Exception {
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
@@ -82,15 +83,16 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void testGetUserById() throws Exception {
         // First create a user
         CreateUserRequest request = CreateUserRequest.builder()
                 .email("getbyid@example.com")
-                .name("Get By ID User")
                 .password("password123")
+                .role(User.UserRole.USER)
                 .build();
 
-        UserResponse createdUser = userService.createUser(request);
+        User.UserResponse createdUser = userService.createUser(request);
 
         mockMvc.perform(get("/users/{id}", createdUser.getId()))
                 .andExpect(status().isOk())
@@ -99,12 +101,13 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void testGetUserByEmail() throws Exception {
         // First create a user
         CreateUserRequest request = CreateUserRequest.builder()
                 .email("getbyemail@example.com")
-                .name("Get By Email User")
                 .password("password123")
+                .role(User.UserRole.USER)
                 .build();
 
         userService.createUser(request);
@@ -115,15 +118,16 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void testUpdateUserStatus() throws Exception {
         // First create a user
         CreateUserRequest request = CreateUserRequest.builder()
                 .email("updatestatus@example.com")
-                .name("Update Status User")
                 .password("password123")
+                .role(User.UserRole.USER)
                 .build();
 
-        UserResponse createdUser = userService.createUser(request);
+        User.UserResponse createdUser = userService.createUser(request);
 
         mockMvc.perform(put("/users/{id}/status", createdUser.getId())
                         .param("status", "INACTIVE"))
@@ -132,6 +136,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void testGetNonExistentUser() throws Exception {
         mockMvc.perform(get("/users/999"))
                 .andExpect(status().isNotFound());
