@@ -16,19 +16,40 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-  cloud:
-    kubernetes:
-      discovery:
-        enabled: true
-        all-namespaces: false
   config:
     activate:
-      on-profile: docker
+      on-profile: '!test'
+    import: |
+      optional:configserver:http://config-service:8888
+      optional:consul:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    config:
+      uri: http://config-service:8888
+      fail-fast: true
   security:
     oauth2:
       resourceserver:
         jwt:
           jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+
+jwt:
+  expiration: 86400000
+  refresh-expiration: 604800000
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
 
 management:
   endpoints:

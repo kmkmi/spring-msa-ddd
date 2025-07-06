@@ -1,35 +1,33 @@
 server:
-  port: 8083
+  port: 8085
 
 spring:
   application:
     name: ad-service
+  # DevTools 설정
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**,templates/**
+    livereload:
+      enabled: true
   config:
-    import: optional:configserver:http://config-service:8888
+    activate:
+      on-profile: '!test'
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
     fail-fast: true
   cloud:
     compatibility-verifier:
       enabled: false
     config:
-      uri: http://config-service:8888
-    kubernetes:
-      discovery:
-        enabled: true
-    consul:
-      host: consul
-      port: 8500
-      discovery:
-        enabled: true
-        service-name: ad-service
-        health-check-path: /ads/health
-        health-check-interval: 15s
-        prefer-ip-address: true
-        hostname: ad-service
+      uri: http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
   datasource:
-    url: jdbc:mysql://ad-db:3306/ad_service_db?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://${AD_DB_HOST:ad-db}:${AD_DB_PORT:3306}/ad_service_db?useSSL=false&serverTimezone=UTC
     username: root
     password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
@@ -52,13 +50,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
   main:
     web-application-type: servlet
 
 # JWT 설정
 jwt:
-  secret: your-super-secret-jwt-key-for-advertising-msa-2024
   expiration: 86400000  # 24시간 (밀리초)
   refresh-expiration: 604800000  # 7일 (밀리초)
   private-key-path: /app/keys/private_key.pem
@@ -90,17 +87,16 @@ spring:
   config:
     activate:
       on-profile: docker
-    import: optional:configserver:http://config-service:8888
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
   cloud:
     compatibility-verifier:
       enabled: false
     config:
-      uri: http://config-service:8888
-    kubernetes:
-      discovery:
-        enabled: true
+      uri: http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
   datasource:
-    url: jdbc:mysql://ad-db:3306/ad_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
+    url: jdbc:mysql://${AD_DB_HOST:ad-db}:${AD_DB_PORT:3306}/ad_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
     username: root
     password: root
     hikari:
@@ -113,4 +109,16 @@ spring:
   sql:
     init:
       mode: always
-      continue-on-error: true 
+      continue-on-error: true
+  consul:
+    host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
+    port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+    discovery:
+      enabled: true
+      service-name: ad-service
+      health-check-path: /actuator/health
+      health-check-interval: 15s
+      prefer-ip-address: true
+      hostname: ad-service
+    config:
+      fail-fast: true 

@@ -1,37 +1,40 @@
 server:
-  port: 8081
+  port: 8083
 
 spring:
   application:
     name: campaign-service
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**,templates/**
+    livereload:
+      enabled: true
   config:
-    import: optional:configserver:http://config-service:8888
+    activate:
+      on-profile: '!test'
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
+    fail-fast: true
   cloud:
     compatibility-verifier:
       enabled: false
     config:
-      uri: http://config-service:8888
-    kubernetes:
-      discovery:
-        enabled: true
-    fail-fast: true
+      uri: http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
-  main:
-    web-application-type: servlet
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
 
-# JWT 설정
 jwt:
-  secret: your-super-secret-jwt-key-for-advertising-msa-2024
-  expiration: 86400000  # 24시간 (밀리초)
-  refresh-expiration: 604800000  # 7일 (밀리초)
+  expiration: 86400000
+  refresh-expiration: 604800000
   private-key-path: /app/keys/private_key.pem
   public-key-path: /app/keys/public_key.pem
 
-# Swagger UI 설정
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -57,17 +60,16 @@ spring:
   config:
     activate:
       on-profile: docker
-    import: optional:configserver:http://config-service:8888
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
   cloud:
     compatibility-verifier:
       enabled: false
     config:
-      uri: http://config-service:8888
-    kubernetes:
-      discovery:
-        enabled: true
+      uri: http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
   datasource:
-    url: jdbc:mysql://campaign-db:3306/campaign_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false&autocommit=false
+    url: jdbc:mysql://${CAMPAIGN_DB_HOST:campaign-db}:${CAMPAIGN_DB_PORT:3306}/campaign_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false&autocommit=false
     username: root
     password: root
     hikari:
@@ -77,8 +79,19 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
       connection-test-query: SELECT 1
-      auto-commit: false
   sql:
     init:
       mode: always
-      continue-on-error: true 
+      continue-on-error: true
+  consul:
+    host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
+    port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+    discovery:
+      enabled: true
+      service-name: campaign-service
+      health-check-path: /actuator/health
+      health-check-interval: 15s
+      prefer-ip-address: true
+      hostname: campaign-service
+    config:
+      fail-fast: true 

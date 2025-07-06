@@ -10,6 +10,94 @@ spring:
     consul:
       host: consul
       port: 8500
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:default-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      linger-ms: 1
+      buffer-memory: 33554432
+
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+    password: ${SPRING_REDIS_PASSWORD:}
+    database: ${SPRING_REDIS_DATABASE:0}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
+# Kafka 토픽 설정
+kafka:
+  topics:
+    ad-events: ${KAFKA_TOPIC_AD_EVENTS:ad-events}
+    ad-recommendations: ${KAFKA_TOPIC_AD_RECOMMENDATIONS:ad-recommendations}
+    campaign-events: ${KAFKA_TOPIC_CAMPAIGN_EVENTS:campaign-events}
+    user-events: ${KAFKA_TOPIC_USER_EVENTS:user-events}
+
+# Spark 설정
+spark:
+  master: ${SPARK_MASTER:spark://spark-master:7077}
+  executor:
+    memory: ${SPARK_EXECUTOR_MEMORY:2g}
+  driver:
+    memory: ${SPARK_DRIVER_MEMORY:1g}
+  data:
+    input-path: ${SPARK_DATA_INPUT_PATH:/opt/data/ad-events}
+    output-path: ${SPARK_DATA_OUTPUT_PATH:/opt/data/results}
+
+# Flink 설정
+flink:
+  kafka:
+    bootstrap-servers: ${FLINK_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    topics:
+      ad-events: ${FLINK_KAFKA_TOPIC_AD_EVENTS:ad-events}
+    group-id: ${FLINK_KAFKA_GROUP_ID:flink-ad-processor}
+
+# 데이터베이스 설정
+database:
+  ad-service:
+    url: ${AD_SERVICE_DB_URL:jdbc:mysql://ad-db:3306/ad_db}
+    username: ${AD_SERVICE_DB_USERNAME:root}
+    password: ${AD_SERVICE_DB_PASSWORD:root}
+  campaign-service:
+    url: ${CAMPAIGN_SERVICE_DB_URL:jdbc:mysql://campaign-db:3308/campaign_db}
+    username: ${CAMPAIGN_SERVICE_DB_USERNAME:root}
+    password: ${CAMPAIGN_SERVICE_DB_PASSWORD:root}
+  user-service:
+    url: ${USER_SERVICE_DB_URL:jdbc:mysql://user-db:3310/userdb}
+    username: ${USER_SERVICE_DB_USERNAME:root}
+    password: ${USER_SERVICE_DB_PASSWORD:root}
+  publisher-service:
+    url: ${PUBLISHER_SERVICE_DB_URL:jdbc:mysql://publisher-db:3309/publisher_db}
+    username: ${PUBLISHER_SERVICE_DB_USERNAME:root}
+    password: ${PUBLISHER_SERVICE_DB_PASSWORD:root}
+
+# 서비스 URL 설정
+service:
+  urls:
+    api-gateway: ${API_GATEWAY_URL:http://api-gateway:8080}
+    user-service: ${USER_SERVICE_URL:http://user-service:8082}
+    campaign-service: ${CAMPAIGN_SERVICE_URL:http://campaign-service:8081}
+    ad-service: ${AD_SERVICE_URL:http://ad-service:8083}
+    publisher-service: ${PUBLISHER_SERVICE_URL:http://publisher-service:8084}
+    data-collector: ${DATA_COLLECTOR_URL:http://data-collector:8085}
+    data-processor: ${DATA_PROCESSOR_URL:http://data-processor:8086}
+    batch-processing: ${BATCH_PROCESSING_URL:http://batch-processing:8088}
+    ad-recommendation: ${AD_RECOMMENDATION_URL:http://ad-recommendation:8087}
+    jwks-service: ${JWKS_SERVICE_URL:http://jwks-service:8090}
 
 management:
   endpoints:
@@ -22,5 +110,4 @@ management:
 
 logging:
   level:
-    org.springframework.cloud.config: DEBUG
-    org.springframework.cloud.kubernetes: DEBUG 
+    org.springframework.cloud.config: DEBUG 

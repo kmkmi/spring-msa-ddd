@@ -42,6 +42,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
 
   # Campaign Service
   campaign-service:
@@ -64,6 +71,12 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
+      - CAMPAIGN_DB_HOST=campaign-db
+      - CAMPAIGN_DB_PORT=3306
 
   # User Service
   user-service:
@@ -86,6 +99,12 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
+      - USER_DB_HOST=user-db
+      - USER_DB_PORT=3306
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
       interval: 10s
@@ -113,6 +132,12 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
+      - AD_DB_HOST=ad-db
+      - AD_DB_PORT=3306
 
   # Publisher Service
   publisher-service:
@@ -135,6 +160,12 @@ services:
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
+      - PUBLISHER_DB_HOST=publisher-db
+      - PUBLISHER_DB_PORT=3306
 
   # MySQL Database (통합)
   mysql:
@@ -149,15 +180,6 @@ services:
       - mysql-data:/var/lib/mysql
       - ./docs/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./docs/sql:/docker-entrypoint-initdb.d/sql
-    networks:
-      - msa-network
-
-  # Redis for caching
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
     networks:
       - msa-network
 
@@ -267,6 +289,263 @@ services:
       timeout: 5s
       retries: 5
 
+  # Data Collector Service
+  data-collector-service:
+    build: ./data-collector-service
+    container_name: data-collector-service
+    ports:
+      - "8089:8089"
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      config-service:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_REDIS_HOST=redis
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Data Processor Service
+  data-processor-service:
+    build: ./data-processor-service
+    container_name: data-processor-service
+    ports:
+      - "8086:8086"
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      config-service:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_REDIS_HOST=redis
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Ad Recommendation Service
+  ad-recommendation-service:
+    build: ./ad-recommendation-service
+    container_name: ad-recommendation-service
+    ports:
+      - "8087:8087"
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      config-service:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8087/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Batch Processing Service
+  batch-processing-service:
+    build: ./batch-processing-service
+    container_name: batch-processing-service
+    ports:
+      - "8088:8088"
+    working_dir: /app
+    command: java -jar app.jar
+    depends_on:
+      config-service:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_started
+    networks:
+      - msa-network
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVICE_HOST=config-service
+      - CONFIG_SERVICE_PORT=8888
+      - JWKS_SERVICE_HOST=jwks-service
+      - JWKS_SERVICE_PORT=8090
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Hadoop NameNode
+  hadoop-namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-namenode
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    environment:
+      - CLUSTER_NAME=advertising-cluster
+    volumes:
+      - hadoop-namenode:/hadoop/dfs/name
+    networks:
+      - msa-network
+
+  # Hadoop DataNode
+  hadoop-datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-datanode
+    depends_on:
+      - hadoop-namenode
+    environment:
+      - SERVICE_PRECONDITION=hadoop-namenode:9870
+    volumes:
+      - hadoop-datanode:/hadoop/dfs/data
+    networks:
+      - msa-network
+
+  # Spark Master
+  spark-master:
+    image: bde2020/spark-master:3.1.1-hadoop3.2
+    container_name: spark-master
+    ports:
+      - "8093:8080"
+      - "7077:7077"
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
+    volumes:
+      - spark-master:/headless
+    networks:
+      - msa-network
+
+  # Spark Worker
+  spark-worker:
+    image: bde2020/spark-worker:3.1.1-hadoop3.2
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_EXECUTOR_MEMORY=2g
+      - SPARK_DRIVER_MEMORY=1g
+      - SPARK_DATA_INPUT_PATH=/opt/data/ad-events
+      - SPARK_DATA_OUTPUT_PATH=/opt/data/results
+    volumes:
+      - spark-worker:/headless
+    networks:
+      - msa-network
+
+  # Flink JobManager
+  flink-jobmanager:
+    image: flink:1.18.1
+    container_name: flink-jobmanager
+    ports:
+      - "8091:8081"
+    environment:
+      - FLINK_PROPERTIES=jobmanager.rpc.address:flink-jobmanager
+    command: jobmanager
+    networks:
+      - msa-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Flink TaskManager
+  flink-taskmanager:
+    image: flink:1.18.1
+    container_name: flink-taskmanager
+    depends_on:
+      flink-jobmanager:
+        condition: service_healthy
+    environment:
+      - FLINK_PROPERTIES=jobmanager.rpc.address:flink-jobmanager;taskmanager.numberOfTaskSlots:2;taskmanager.memory.process.size:2048m;taskmanager.memory.managed.size:512m;taskmanager.maxRegistrationDuration:5 min
+      - FLINK_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - FLINK_KAFKA_TOPIC_AD_EVENTS=ad-events
+      - FLINK_KAFKA_GROUP_ID=flink-ad-processor
+      - FLINK_KAFKA_TOPIC_AD_CLICKS=ad-clicks
+      - FLINK_KAFKA_TOPIC_AD_IMPRESSIONS=ad-impressions
+      - FLINK_KAFKA_CLICK_GROUP_ID=flink-click-processor
+      - FLINK_KAFKA_IMPRESSION_GROUP_ID=flink-impression-processor
+    command: taskmanager
+    networks:
+      - msa-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./flink-apps/target:/opt/flink/usrlib
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - msa-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
   kafka:
     image: bitnami/kafka:latest
     container_name: kafka
@@ -280,7 +559,7 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_KRAFT_CLUSTER_ID=0S58ImIOSZuJok-yz94fCA
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - ALLOW_PLAINTEXT_LISTENER=yes
     networks:
       - msa-network
@@ -288,6 +567,10 @@ services:
 volumes:
   mysql-data:
   consul-data:
+  hadoop-namenode:
+  hadoop-datanode:
+  spark-master:
+  spark-worker:
 
 networks:
   msa-network:

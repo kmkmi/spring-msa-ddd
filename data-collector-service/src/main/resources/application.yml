@@ -1,0 +1,139 @@
+server:
+  port: 8089
+  ssl:
+    enabled: false
+  tomcat:
+    max-http-form-post-size: 2MB
+    max-swallow-size: 2MB
+    relaxed-query-chars: "|,{,},[,],\\"
+    relaxed-path-chars: "|,{,},[,],\\"
+
+spring:
+  application:
+    name: data-collector-service
+  config:
+    activate:
+      on-profile: '!test'
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
+    fail-fast: true
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    config:
+      uri: http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
+    consul:
+      host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
+      port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+      discovery:
+        service-name: data-collector-service
+        instance-id: ${spring.application.name}:${server.port}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        prefer-ip-address: true
+        register: true
+        deregister: true
+      config:
+        enabled: false
+        fail-fast: true
+  # DevTools 설정
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**,templates/**
+    livereload:
+      enabled: true
+  # Kafka 설정
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      linger-ms: 1
+      buffer-memory: 33554432
+  # Redis 설정
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.example.datacollector: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.data.redis: INFO
+    org.apache.coyote.http11: WARN
+    org.apache.tomcat.util.net: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    config:
+      uri: http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
+  consul:
+    host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
+    port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+    discovery:
+      enabled: true
+      service-name: data-collector-service
+      health-check-path: /actuator/health
+      health-check-interval: 15s
+      prefer-ip-address: true
+      hostname: data-collector-service
+    config:
+      fail-fast: true
+
+# JWT 설정
+jwt:
+  expiration: 86400000  # 24시간 (밀리초)
+  refresh-expiration: 604800000  # 7일 (밀리초)
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
+
+# Swagger UI 설정
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks 

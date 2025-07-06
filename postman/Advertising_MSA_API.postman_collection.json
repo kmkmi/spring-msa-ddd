@@ -654,6 +654,164 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "데이터 파이프라인 (Data Collector/Processor)",
+			"item": [
+				{
+					"name": "Data Collector 헬스체크",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:8085/actuator/health",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					}
+				},
+				{
+					"name": "Data Processor 헬스체크",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:8086/actuator/health",
+							"host": [
+								"localhost"
+							],
+							"port": "8086",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					}
+				},
+				{
+					"name": "광고 노출 이벤트 수집",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"advertisementId\": 1,\n  \"campaignId\": 1,\n  \"userId\": 123,\n  \"deviceType\": \"MOBILE\",\n  \"location\": \"Seoul\",\n  \"placement\": \"TOP_BANNER\",\n  \"duration\": 30,\n  \"isViewable\": true,\n  \"creativeType\": \"BANNER\",\n  \"publisherId\": \"pub_001\",\n  \"sessionId\": \"sess_001\",\n  \"requestId\": \"req_001\",\n  \"bidAmount\": 15.50\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8085/api/v1/events/ad/impression",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"ad",
+								"impression"
+							]
+						}
+					}
+				},
+				{
+					"name": "광고 클릭 이벤트 수집",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"advertisementId\": 1,\n  \"campaignId\": 1,\n  \"userId\": 123,\n  \"deviceType\": \"MOBILE\",\n  \"location\": \"Seoul\",\n  \"placement\": \"TOP_BANNER\",\n  \"creativeType\": \"BANNER\",\n  \"publisherId\": \"pub_001\",\n  \"sessionId\": \"sess_001\",\n  \"requestId\": \"req_001\",\n  \"bidAmount\": 15.50\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8085/api/v1/events/ad/click",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"ad",
+								"click"
+							]
+						}
+					}
+				},
+				{
+					"name": "광고 전환 이벤트 수집",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"advertisementId\": 1,\n  \"campaignId\": 1,\n  \"userId\": 123,\n  \"deviceType\": \"MOBILE\",\n  \"location\": \"Seoul\",\n  \"placement\": \"TOP_BANNER\",\n  \"creativeType\": \"BANNER\",\n  \"publisherId\": \"pub_001\",\n  \"sessionId\": \"sess_001\",\n  \"requestId\": \"req_001\",\n  \"bidAmount\": 15.50\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8085/api/v1/events/ad/conversion",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"ad",
+								"conversion"
+							]
+						}
+					}
+				},
+				{
+					"name": "일반 광고 이벤트 수집",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"eventType\": \"IMPRESSION\",\n  \"advertisementId\": 1,\n  \"campaignId\": 1,\n  \"userId\": 123,\n  \"deviceType\": \"DESKTOP\",\n  \"location\": \"Busan\",\n  \"placement\": \"SIDE_BANNER\",\n  \"duration\": 45,\n  \"isViewable\": true,\n  \"creativeType\": \"VIDEO\",\n  \"publisherId\": \"pub_002\",\n  \"sessionId\": \"sess_002\",\n  \"requestId\": \"req_002\",\n  \"bidAmount\": 25.00\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8085/api/v1/events/ad",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"ad"
+							]
+						}
+					}
+				}
+			]
 		}
 	]
 } 

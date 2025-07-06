@@ -35,8 +35,13 @@
 	<modules>
 		<module>ad-service</module>
 		<module>api-gateway</module>
+		<module>batch-processing-service</module>
 		<module>campaign-service</module>
 		<module>config-service</module>
+		<module>data-collector-service</module>
+		<module>data-processor-service</module>
+		<module>flink-apps</module>
+		<module>spark-apps</module>
 		<module>publisher-service</module>
 		<module>shared</module>
 		<module>user-service</module>

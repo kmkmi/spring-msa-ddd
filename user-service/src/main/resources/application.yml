@@ -4,22 +4,30 @@ server:
 spring:
   application:
     name: user-service
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**,templates/**
+    livereload:
+      enabled: true
   config:
-    import: optional:configserver:http://config-service:8888
+    activate:
+      on-profile: '!test'
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
+    fail-fast: true
   cloud:
     compatibility-verifier:
       enabled: false
     config:
-      uri: http://config-service:8888
-    kubernetes:
-      discovery:
-        enabled: true
-    fail-fast: true
+      uri: http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
 
 # JWT 설정
 # secret 키는 사용하지 않음 (키 파일에서 로드)
@@ -56,17 +64,16 @@ spring:
   config:
     activate:
       on-profile: docker
-    import: optional:configserver:http://config-service:8888
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
   cloud:
     compatibility-verifier:
       enabled: false
     config:
-      uri: http://config-service:8888
-    kubernetes:
-      discovery:
-        enabled: true
+      uri: http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
   datasource:
-    url: jdbc:mysql://user-db:3306/userdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
+    url: jdbc:mysql://${USER_DB_HOST:user-db}:${USER_DB_PORT:3306}/userdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
     username: root
     password: root
     hikari:
@@ -79,4 +86,16 @@ spring:
   sql:
     init:
       mode: always
-      continue-on-error: true 
+      continue-on-error: true
+  consul:
+    host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
+    port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+    discovery:
+      enabled: true
+      service-name: user-service
+      health-check-path: /actuator/health
+      health-check-interval: 15s
+      prefer-ip-address: true
+      hostname: user-service
+    config:
+      fail-fast: true 

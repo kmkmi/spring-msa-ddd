@@ -9,19 +9,18 @@ spring:
   config:
     activate:
       on-profile: '!test'
-    import: optional:configserver:http://config-service:8888
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
+    fail-fast: true
   cloud:
     compatibility-verifier:
       enabled: false
     config:
-      uri: http://config-service:8888
-      fail-fast: true
-    kubernetes:
-      discovery:
-        enabled: true
+      uri: http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
     consul:
-      host: consul
-      port: 8500
+      host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
+      port: ${SPRING_CLOUD_CONSUL_PORT:8500}
       discovery:
         enabled: true
         service-name: api-gateway
@@ -29,11 +28,13 @@ spring:
         health-check-interval: 15s
         prefer-ip-address: true
         hostname: api-gateway
+      config:
+        fail-fast: true
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
 
 # JWT 설정
 jwt:
@@ -65,24 +66,27 @@ management:
       show-details: always
 
 ---
-# 테스트 환경에서는 config import를 아예 비활성화
 spring:
   config:
     activate:
-      on-profile: test
-    import: ""
-
-# logging:
-#   level:
-#     org.springframework.cloud.gateway: DEBUG
-#     com.example.gateway: DEBUG
-
-# ---
-# spring:
-#   config:
-#     activate:
-#       on-profile: docker
-#     import: optional:configserver:http://config-service:8888
-#   cloud:
-#     config:
-#       uri: http://config-service:8888 
+      on-profile: docker
+    import: |
+      optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
+      optional:consul:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    config:
+      uri: http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
+    consul:
+      host: ${SPRING_CLOUD_CONSUL_HOST:consul}
+      port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+      discovery:
+        enabled: true
+        service-name: api-gateway
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        prefer-ip-address: true
+        hostname: api-gateway
+      config:
+        fail-fast: true 
