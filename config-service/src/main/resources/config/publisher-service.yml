@@ -4,11 +4,34 @@ server:
 spring:
   application:
     name: publisher-service
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**,templates/**
+    livereload:
+      enabled: true
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
   datasource:
-    url: jdbc:mysql://publisher-db:3306/publisher_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://${PUBLISHER_DB_HOST:publisher-db}:3306/publisher_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,11 +39,23 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+
+jwt:
+  expiration: 86400000  # 24시간 (밀리초)
+  refresh-expiration: 604800000  # 7일 (밀리초)
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
 
 management:
   endpoints:
@@ -33,4 +68,29 @@ management:
 
 logging:
   level:
-    com.example.publisher: DEBUG 
+    com.example.publisher: DEBUG
+    org.springframework.web: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:jwks-service}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
+  datasource:
+    url: jdbc:mysql://${PUBLISHER_DB_HOST:publisher-db}:3306/publisher_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+

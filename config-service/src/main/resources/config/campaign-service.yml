@@ -5,10 +5,17 @@ spring:
   application:
     name: campaign-service
   datasource:
-    url: jdbc:mysql://campaign-db:3306/campaign_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://${CAMPAIGN_DB_HOST:campaign-db}:3306/campaign_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,23 +23,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-  config:
-    activate:
-      on-profile: '!test'
-    import: |
-      optional:configserver:http://config-service:8888
-      optional:consul:
-  cloud:
-    compatibility-verifier:
-      enabled: false
-    config:
-      uri: http://config-service:8888
-      fail-fast: true
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
 
 jwt:
   expiration: 86400000
@@ -62,4 +57,27 @@ management:
 
 logging:
   level:
-    com.example.campaign: DEBUG 
+    com.example.campaign: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:jwks-service}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
+  datasource:
+    url: jdbc:mysql://${CAMPAIGN_DB_HOST:campaign-db}:3306/campaign_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1 

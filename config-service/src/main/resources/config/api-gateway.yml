@@ -11,43 +11,77 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
+        - id: user-service-users
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - StripPrefix=2
+        - id: user-service-auth
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - StripPrefix=2
         - id: campaign-service
           uri: lb://campaign-service
           predicates:
-            - Path=/api/campaigns/**
+            - Path=/api/v1/campaigns/**
           filters:
-            - StripPrefix=1
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/users/**
-          filters:
-            - StripPrefix=1
-        - id: user-auth
-          uri: lb://user-service
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - StripPrefix=1
+            - StripPrefix=2
         - id: ad-service
           uri: lb://ad-service
           predicates:
-            - Path=/api/ads/**
+            - Path=/api/v1/ads/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=2
         - id: publisher-service
           uri: lb://publisher-service
           predicates:
-            - Path=/api/publishers/**
+            - Path=/api/v1/publishers/**
           filters:
-            - StripPrefix=1
-        - id: user-service-health
-          uri: lb://user-service
+            - StripPrefix=2
+        - id: data-collector-service
+          uri: lb://data-collector-service
           predicates:
-            - Path=/api/users/health
+            - Path=/api/v1/events/**
           filters:
-            - StripPrefix=1
-spring.security.oauth2.resourceserver.jwt.jwk-set-uri: http://jwks-service:8090/oauth2/jwks
+            - StripPrefix=2
+        - id: batch-processing-service
+          uri: lb://batch-processing-service
+          predicates:
+            - Path=/api/v1/batch/**
+          filters:
+            - StripPrefix=2
+        - id: ad-recommendation-service
+          uri: lb://ad-recommendation-service
+          predicates:
+            - Path=/api/v1/recommendations/**
+          filters:
+            - StripPrefix=2
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
+
+jwt:
+  secret: your-super-secret-jwt-key-for-advertising-msa-2024
+  expiration: 86400000  # 24시간 (밀리초)
+  refresh-expiration: 604800000  # 7일 (밀리초)
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
 
 management:
   endpoints:
@@ -57,7 +91,33 @@ management:
   endpoint:
     health:
       show-details: always
+    gateway:
+      enabled: true
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG 
+    com.example.gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:jwks-service}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true 

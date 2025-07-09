@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/events")
+@RequestMapping("/events")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Data Collector", description = "광고 데이터 수집 API")

@@ -3,6 +3,8 @@ package com.example.campaign.presentation;
 import com.example.campaign.application.dto.CreateCampaignRequest;
 import com.example.campaign.application.dto.CampaignResponse;
 import com.example.campaign.application.service.CampaignService;
+import com.example.campaign.application.service.CampaignManagerService;
+import com.example.campaign.application.dto.*;
 import com.example.campaign.domain.Campaign;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/campaigns")
@@ -30,6 +34,7 @@ import java.util.List;
 public class CampaignController {
     
     private final CampaignService campaignService;
+    private final CampaignManagerService campaignManagerService;
     
     @GetMapping("/health")
     @Operation(summary = "헬스 체크", description = "서비스 상태를 확인합니다.")
@@ -72,15 +77,24 @@ public class CampaignController {
     }
     
     @GetMapping
-    @Operation(summary = "모든 캠페인 조회", description = "모든 캠페인 목록을 조회합니다.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "캠페인 목록 조회 성공",
-            content = @Content(schema = @Schema(implementation = CampaignResponse.class)))
-    })
-    @PreAuthorize("hasAnyRole('ADMIN', 'PUBLISHER', 'ADVERTISER', 'USER')")
-    public ResponseEntity<List<CampaignResponse>> getAllCampaigns() {
-        log.info("Getting all campaigns");
-        List<CampaignResponse> campaigns = campaignService.getAllCampaigns();
+    @Operation(summary = "캠페인 목록 조회", description = "다양한 조건으로 캠페인 목록을 조회합니다.")
+    public ResponseEntity<Page<CampaignResponse>> getCampaigns(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) Double minBudget,
+            @RequestParam(required = false) Double maxBudget,
+            Pageable pageable) {
+        CampaignSearchRequest searchRequest = CampaignSearchRequest.builder()
+            .keyword(keyword)
+            .status(status)
+            .startDate(startDate)
+            .endDate(endDate)
+            .minBudget(minBudget)
+            .maxBudget(maxBudget)
+            .build();
+        Page<CampaignResponse> campaigns = campaignManagerService.searchCampaigns(searchRequest, pageable);
         return ResponseEntity.ok(campaigns);
     }
     

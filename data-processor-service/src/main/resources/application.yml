@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: 8086
 
 spring:
   application:
@@ -7,116 +7,45 @@ spring:
   config:
     activate:
       on-profile: '!test'
-    import: |
-      optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
-      optional:consul:
+    import:
+      - "optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}"
     fail-fast: true
   cloud:
     compatibility-verifier:
       enabled: false
-    config:
-      uri: http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
-
-# JWT 설정
-jwt:
-  expiration: 86400000  # 24시간 (밀리초)
-  refresh-expiration: 604800000  # 7일 (밀리초)
-  private-key-path: /app/keys/private_key.pem
-  public-key-path: /app/keys/public_key.pem
-
-# Swagger UI 설정
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    operations-sorter: method
-    tags-sorter: alpha
-    doc-expansion: none
-    disable-swagger-default-url: true
-    display-request-duration: true
-  default-produces-media-type: application/json
-  default-consumes-media-type: application/json
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always
-
-logging:
-  level:
-    com.example.dataprocessor: DEBUG
-    org.springframework.kafka: INFO
-    org.springframework.data.redis: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    consul:
+      host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
+      port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+      discovery:
+        enabled: true
+        service-name: data-processor-service
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        prefer-ip-address: true
+        hostname: data-processor-service
 
 ---
 spring:
+  application:
+    name: data-processor-service
   config:
     activate:
       on-profile: docker
-    import: |
-      optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
-      optional:consul:
+    import:
+      - "optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}"
+    fail-fast: true
   cloud:
     compatibility-verifier:
       enabled: false
+    consul:
+      host: ${SPRING_CLOUD_CONSUL_HOST:consul}
+      port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+      discovery:
+        enabled: true
+        service-name: data-processor-service
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        prefer-ip-address: true
+        hostname: data-processor-service
     config:
-      uri: http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
-  consul:
-    host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
-    port: ${SPRING_CLOUD_CONSUL_PORT:8500}
-    discovery:
-      enabled: true
-      service-name: data-processor-service
-      health-check-path: /actuator/health
-      health-check-interval: 15s
-      prefer-ip-address: true
-      hostname: data-processor-service
-    config:
-      fail-fast: true
-  # DevTools 설정
-  devtools:
-    restart:
-      enabled: true
-      additional-paths: src/main/java
-      exclude: static/**,public/**,templates/**
-    livereload:
-      enabled: true
-  # Kafka 설정
-  kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    consumer:
-      group-id: ad-processor-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      acks: all
-      retries: 3
-      batch-size: 16384
-      linger-ms: 1
-      buffer-memory: 33554432
-  # Redis 설정
-  redis:
-    host: ${SPRING_REDIS_HOST:localhost}
-    port: ${SPRING_REDIS_PORT:6379}
-    timeout: 2000ms
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms 
+      uri: http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888} 

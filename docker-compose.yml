@@ -77,7 +77,7 @@ services:
       - JWKS_SERVICE_HOST=jwks-service
       - JWKS_SERVICE_PORT=8090
       - CAMPAIGN_DB_HOST=campaign-db
-      - CAMPAIGN_DB_PORT=3306
+      - CAMPAIGN_DB_PORT=3308
 
   # User Service
   user-service:
@@ -105,7 +105,7 @@ services:
       - JWKS_SERVICE_HOST=jwks-service
       - JWKS_SERVICE_PORT=8090
       - USER_DB_HOST=user-db
-      - USER_DB_PORT=3306
+      - USER_DB_PORT=3309
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
       interval: 10s
@@ -138,7 +138,7 @@ services:
       - JWKS_SERVICE_HOST=jwks-service
       - JWKS_SERVICE_PORT=8090
       - AD_DB_HOST=ad-db
-      - AD_DB_PORT=3306
+      - AD_DB_PORT=3307
 
   # Publisher Service
   publisher-service:
@@ -166,7 +166,7 @@ services:
       - JWKS_SERVICE_HOST=jwks-service
       - JWKS_SERVICE_PORT=8090
       - PUBLISHER_DB_HOST=publisher-db
-      - PUBLISHER_DB_PORT=3306
+      - PUBLISHER_DB_PORT=3310
 
   # MySQL Database (통합)
   mysql:
@@ -295,7 +295,7 @@ services:
     build: ./data-collector-service
     container_name: data-collector-service
     ports:
-      - "8089:8089"
+      - "8085:8085"
     working_dir: /app
     command: java -jar app.jar
     depends_on:
@@ -320,7 +320,7 @@ services:
       - JWKS_SERVICE_HOST=jwks-service
       - JWKS_SERVICE_PORT=8090
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8089/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -1,0 +1,62 @@
+server:
+  port: 8085
+  ssl:
+    enabled: false
+  tomcat:
+    max-http-form-post-size: 2MB
+    max-swallow-size: 2MB
+    relaxed-query-chars: "|,{,},[,],\\"
+    relaxed-path-chars: "|,{,},[,],\\"
+
+spring:
+  application:
+    name: data-collector-service
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**,templates/**
+    livereload:
+      enabled: true
+
+jwt:
+  expiration: 86400000  # 24시간 (밀리초)
+  refresh-expiration: 604800000  # 7일 (밀리초)
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.example.datacollector: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.data.redis: INFO
+    org.apache.coyote.http11: WARN
+    org.apache.tomcat.util.net: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n" 

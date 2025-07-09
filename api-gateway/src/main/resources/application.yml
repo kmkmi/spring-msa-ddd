@@ -1,6 +1,3 @@
-server:
-  port: 8080
-
 spring:
   main:
     web-application-type: reactive
@@ -11,7 +8,6 @@ spring:
       on-profile: '!test'
     import:
       - "optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}"
-      - "optional:consul:"
     fail-fast: true
   cloud:
     compatibility-verifier:
@@ -28,51 +24,19 @@ spring:
         health-check-interval: 15s
         prefer-ip-address: true
         hostname: api-gateway
-      config:
-        fail-fast: true
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
-
-# JWT 설정
-jwt:
-  secret: your-super-secret-jwt-key-for-advertising-msa-2024
-  expiration: 86400000  # 24시간 (밀리초)
-  refresh-expiration: 604800000  # 7일 (밀리초)
-  private-key-path: /app/keys/private_key.pem
-  public-key-path: /app/keys/public_key.pem
-
-# Swagger UI 설정
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    operations-sorter: method
-    tags-sorter: alpha
-    doc-expansion: none
-    disable-swagger-default-url: true
-    display-request-duration: true
-  default-produces-media-type: application/json
-  default-consumes-media-type: application/json
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always
 
 ---
 spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: api-gateway
   config:
     activate:
       on-profile: docker
     import:
       - "optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}"
-      - "optional:consul:"
+    fail-fast: true
   cloud:
     compatibility-verifier:
       enabled: false
@@ -87,6 +51,4 @@ spring:
         health-check-path: /actuator/health
         health-check-interval: 15s
         prefer-ip-address: true
-        hostname: api-gateway
-      config:
-        fail-fast: true 
+        hostname: api-gateway 

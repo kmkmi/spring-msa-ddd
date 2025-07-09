@@ -267,7 +267,6 @@ shared/
     └── security/
         ├── JwtAuthenticationFilter.java
         ├── JwtTokenProvider.java
-        ├── SecurityConstants.java
         ├── dto/
         │   ├── AuthRequest.java
         │   ├── AuthResponse.java

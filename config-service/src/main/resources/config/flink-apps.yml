@@ -1,19 +1,7 @@
 spring:
   application:
     name: flink-apps
-
-logging:
-  level:
-    com.example.advertising: DEBUG
-    org.apache.flink: INFO
-    org.springframework.cloud.config: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-
-# Flink 애플리케이션 설정
-flink:
   kafka:
-    bootstrap-servers: localhost:9092
     click-topic: ad-clicks
     impression-topic: ad-impressions
     click-group-id: flink-click-processor
@@ -28,4 +16,33 @@ flink:
   monitoring:
     enable-metrics: true
     metrics-prefix: flink.advertising
-    metrics-interval-seconds: 30 
+    metrics-interval-seconds: 30
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  kafka:
+    click-topic: ad-clicks
+    impression-topic: ad-impressions
+    click-group-id: flink-click-processor
+    impression-group-id: flink-impression-processor
+  processing:
+    click-window-seconds: 10
+    impression-window-seconds: 10
+    user-pattern-window-minutes: 5
+    ctr-window-minutes: 1
+    cpm-window-minutes: 1
+    geographic-window-minutes: 5
+  monitoring:
+    enable-metrics: true
+    metrics-prefix: flink.advertising
+    metrics-interval-seconds: 30
+logging:
+  level:
+    com.example.advertising: DEBUG
+    org.apache.flink: INFO
+    org.springframework.cloud.config: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n" 

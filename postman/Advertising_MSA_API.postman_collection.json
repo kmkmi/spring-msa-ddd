@@ -2,13 +2,13 @@
 	"info": {
 		"_postman_id": "advertising-msa-api-latest",
 		"name": "Advertising MSA API (Latest)",
-		"description": "최신 코드 기준 광고 마이크로서비스 아키텍처 API 테스트 컬렉션\n\n# 테스트 순서 추천\n1. 회원가입 → 로그인(토큰 발급)\n2. 유저/퍼블리셔 생성\n3. 캠페인 생성\n4. 광고 생성\n5. 각 서비스별 조회/수정/상태변경/헬스체크\n\n* Authorization: Bearer {{access_token}} 필요시 로그인 후 토큰 변수에 할당\n* 모든 엔드포인트는 http://localhost:8080/api/ 기준으로 접근\n",
+		"description": "최신 코드 기준 광고 마이크로서비스 아키텍처 API 테스트 컬렉션\n\n# 테스트 순서 추천\n1. 회원가입 → 로그인(토큰 발급)\n2. 유저/퍼블리셔 생성\n3. 캠페인 생성\n4. 광고 생성\n5. 각 서비스별 조회/수정/상태변경/헬스체크\n\n* Authorization: Bearer {{access_token}} 필요시 로그인 후 토큰 변수에 할당\n* 모든 엔드포인트는 http://localhost:8080/api/v1/ 기준으로 접근\n",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
-	"variable": [
+			"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:8080/api",
+			"value": "http://localhost:8080/api/v1",
 			"type": "string"
 		},
 		{

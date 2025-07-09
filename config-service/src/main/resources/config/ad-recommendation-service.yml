@@ -1,21 +1,10 @@
+server:
+  port: 8087
+
 spring:
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
-  redis:
-    host: redis
-    port: 6379
-  data:
-    redis:
-      host: redis
-      port: 6379
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
+  application:
+    name: ad-recommendation-service
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: ad-recommendation-group
       auto-offset-reset: earliest
@@ -24,35 +13,18 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always
-
-logging:
-  level:
-    com.example.adrecommendation: DEBUG
-    org.springframework.kafka: INFO
-    org.springframework.data.redis: DEBUG
-    org.springframework.boot.autoconfigure: DEBUG
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:localhost}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
 
 ---
 spring:
   config:
     activate:
       on-profile: docker
-  redis:
-    host: redis
-  data:
-    redis:
-      host: redis
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: ad-recommendation-group
       auto-offset-reset: earliest
@@ -61,19 +33,25 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${JWKS_SERVICE_HOST:jwks-service}:${JWKS_SERVICE_PORT:8090}/oauth2/jwks
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always
+jwt:
+  expiration: 86400000  # 24시간 (밀리초)
+  refresh-expiration: 604800000  # 7일 (밀리초)
+  private-key-path: /app/keys/private_key.pem
+  public-key-path: /app/keys/public_key.pem
 
-logging:
-  level:
-    com.example.adrecommendation: DEBUG
-    org.springframework.kafka: INFO
-    org.springframework.data.redis: DEBUG
-    org.springframework.boot.autoconfigure: DEBUG 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+    display-request-duration: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json 

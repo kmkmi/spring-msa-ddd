@@ -1,6 +1,6 @@
 package com.example.gateway.filter;
 
-import com.example.shared.security.JwtTokenProvider;
+import com.example.gateway.config.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -73,12 +73,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicPath(String path) {
-        return path.startsWith("/api/auth/") ||
+        return path.startsWith("/api/v1/auth/") ||
                path.startsWith("/actuator/health") ||
-               path.startsWith("/api/users/health") ||
-               path.startsWith("/api/campaigns/health") ||
-               path.startsWith("/api/ads/health") ||
-               path.startsWith("/api/publishers/health") ||
+               path.startsWith("/actuator/gateway/routes") ||
+               path.startsWith("/api/v1/users/health") ||
+               path.startsWith("/api/v1/campaigns/health") ||
+               path.startsWith("/api/v1/ads/health") ||
+               path.startsWith("/api/v1/publishers/health") ||
                path.startsWith("/swagger-ui/") ||
                path.startsWith("/api-docs/") ||
                path.startsWith("/v3/api-docs/");

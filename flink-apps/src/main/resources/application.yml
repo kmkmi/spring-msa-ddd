@@ -4,53 +4,47 @@ spring:
   config:
     activate:
       on-profile: '!test'
-    import: |
-      optional:configserver:http://config-service:8888
-      optional:consul:
+    import:
+      - "optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}"
+    fail-fast: true
   cloud:
+    compatibility-verifier:
+      enabled: false
     config:
-      uri: http://config-service:8888
-      fail-fast: true
+      uri: http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
     consul:
-      config:
-        fail-fast: true
-
-logging:
-  level:
-    com.example.advertising: DEBUG
-    org.apache.flink: INFO
-    org.springframework.cloud.config: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-
-# Flink 애플리케이션 기본 설정
-flink:
-  kafka:
-    bootstrap-servers: localhost:9092
-    click-topic: ad-clicks
-    impression-topic: ad-impressions
-    click-group-id: flink-click-processor
-    impression-group-id: flink-impression-processor
-  processing:
-    click-window-seconds: 10
-    impression-window-seconds: 10
-    user-pattern-window-minutes: 5
-    ctr-window-minutes: 1
-    cpm-window-minutes: 1
-    geographic-window-minutes: 5
-  monitoring:
-    enable-metrics: true
-    metrics-prefix: flink.advertising
-    metrics-interval-seconds: 30
+      host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
+      port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+      discovery:
+        enabled: true
+        service-name: flink-apps
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        prefer-ip-address: true
+        hostname: flink-apps
 
 ---
 spring:
+  application:
+    name: flink-apps
   config:
     activate:
       on-profile: docker
-    import: |
-      optional:configserver:http://config-service:8888
-      optional:consul:
-  # ... 기존 설정 유지
-
-# ... 기존 설정 유지 
+    import:
+      - "optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}"
+    fail-fast: true
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    config:
+      uri: http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
+    consul:
+      host: ${SPRING_CLOUD_CONSUL_HOST:consul}
+      port: ${SPRING_CLOUD_CONSUL_PORT:8500}
+      discovery:
+        enabled: true
+        service-name: flink-apps
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        prefer-ip-address: true
+        hostname: flink-apps 

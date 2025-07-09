@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/batch")
+@RequestMapping("/batch")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Batch Processing", description = "배치 처리 작업 관리 API")
