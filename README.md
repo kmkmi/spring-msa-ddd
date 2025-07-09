@@ -412,7 +412,6 @@ docker-compose up -d
 ### Documentation
 - **SQL Scripts**: `docs/sql/` - 데이터베이스 스키마 및 초기화 스크립트
 - **Swagger Guide**: `docs/swagger-ui-guide.md` - API 문서 사용 가이드
-- **Database Connection**: `docs/database-connection-info.md` - 데이터베이스 연결 정보
 - **Data Pipeline**: `docs/data-pipeline-architecture.md` - 데이터 파이프라인 아키텍처
 
 ---

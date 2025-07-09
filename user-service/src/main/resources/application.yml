@@ -14,9 +14,9 @@ spring:
   config:
     activate:
       on-profile: '!test'
-    import: |
-      optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}
-      optional:consul:
+    import:
+      - "optional:configserver:http://${CONFIG_SERVICE_HOST:localhost}:${CONFIG_SERVICE_PORT:8888}"
+      - "optional:consul:"
     fail-fast: true
   cloud:
     compatibility-verifier:
@@ -64,9 +64,9 @@ spring:
   config:
     activate:
       on-profile: docker
-    import: |
-      optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}
-      optional:consul:
+    import:
+      - "optional:configserver:http://${CONFIG_SERVICE_HOST:config-service}:${CONFIG_SERVICE_PORT:8888}"
+      - "optional:consul:"
   cloud:
     compatibility-verifier:
       enabled: false

@@ -99,14 +99,13 @@ graph TB
     G --> S
     H --> S
 
-    %% 스타일
-    classDef clientLayer fill:#e1f5fe
-    classDef gatewayLayer fill:#f3e5f5
-    classDef businessLayer fill:#e8f5e8
-    classDef dataLayer fill:#fff3e0
-    classDef infraLayer fill:#fce4ec
-    classDef dbLayer fill:#f1f8e9
-    classDef securityLayer fill:#fff8e1
+    classDef clientLayer fill:#2196f3,stroke:#1976d2,stroke-width:2px,color:#ffffff
+    classDef gatewayLayer fill:#9c27b0,stroke:#7b1fa2,stroke-width:2px,color:#ffffff
+    classDef businessLayer fill:#4caf50,stroke:#388e3c,stroke-width:2px,color:#ffffff
+    classDef dataLayer fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#ffffff
+    classDef infraLayer fill:#e91e63,stroke:#c2185b,stroke-width:2px,color:#ffffff
+    classDef dbLayer fill:#8bc34a,stroke:#689f38,stroke-width:2px,color:#ffffff
+    classDef securityLayer fill:#ffc107,stroke:#ffa000,stroke-width:2px,color:#000000
 
     class A,B,C clientLayer
     class D gatewayLayer
@@ -179,14 +178,13 @@ graph LR
     D --> J
     D --> K
 
-    %% 스타일
-    classDef eventSource fill:#e3f2fd
-    classDef collection fill:#e8f5e8
-    classDef messaging fill:#fff3e0
-    classDef processing fill:#fce4ec
-    classDef cache fill:#f1f8e9
-    classDef analytics fill:#fff8e1
-    classDef anomaly fill:#ffebee
+    classDef eventSource fill:#2196f3,stroke:#1976d2,stroke-width:2px,color:#ffffff
+    classDef collection fill:#4caf50,stroke:#388e3c,stroke-width:2px,color:#ffffff
+    classDef messaging fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#ffffff
+    classDef processing fill:#e91e63,stroke:#c2185b,stroke-width:2px,color:#ffffff
+    classDef cache fill:#8bc34a,stroke:#689f38,stroke-width:2px,color:#ffffff
+    classDef analytics fill:#ffc107,stroke:#ffa000,stroke-width:2px,color:#000000
+    classDef anomaly fill:#f44336,stroke:#d32f2f,stroke-width:2px,color:#ffffff
 
     class A1,A2,A3 eventSource
     class B collection
@@ -267,11 +265,10 @@ graph TD
     %% 일별 집계
     M --> N
 
-    %% 스타일
-    classDef adMetrics fill:#e8f5e8
-    classDef campaignMetrics fill:#fff3e0
-    classDef hourlyMetrics fill:#fce4ec
-    classDef dailyMetrics fill:#f1f8e9
+    classDef adMetrics fill:#4caf50,stroke:#388e3c,stroke-width:2px,color:#ffffff
+    classDef campaignMetrics fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#ffffff
+    classDef hourlyMetrics fill:#e91e63,stroke:#c2185b,stroke-width:2px,color:#ffffff
+    classDef dailyMetrics fill:#8bc34a,stroke:#689f38,stroke-width:2px,color:#ffffff
 
     class A,B,C,D,E,F adMetrics
     class G,H,I,J campaignMetrics
@@ -292,16 +289,3 @@ graph TD
 | **Service Discovery** | Consul | 서비스 디스커버리 |
 | **Configuration** | Spring Cloud Config | 중앙화된 설정 관리 |
 
-### 성능 지표
-
-- **처리량**: 초당 10,000+ 이벤트 처리
-- **지연시간**: 평균 50ms 이하
-- **가용성**: 99.9% 이상
-- **확장성**: 수평 확장 지원
-
-### 모니터링 지표
-
-- **서비스 헬스**: `/actuator/health`
-- **메트릭**: Redis 키 기반 실시간 모니터링
-- **알림**: 이상 탐지 시 자동 알림
-- **로그**: 구조화된 로그 및 추적 
