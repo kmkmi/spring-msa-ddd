@@ -1,0 +1,66 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "database-client.connections": [
+      {
+        "name": "Ad Service DB",
+        "driver": "MySQL",
+        "server": "127.0.0.1",
+        "port": 3307,
+        "database": "ad_db",
+        "username": "root",
+        "password": "root",
+        "connectionTimeout": 30000,
+        "acquireTimeout": 30000,
+        "timeout": 30000
+      },
+      {
+        "name": "Campaign Service DB",
+        "driver": "MySQL",
+        "server": "127.0.0.1",
+        "port": 3308,
+        "database": "campaign_db",
+        "username": "root",
+        "password": "root",
+        "connectionTimeout": 30000,
+        "acquireTimeout": 30000,
+        "timeout": 30000
+      },
+      {
+        "name": "User Service DB",
+        "driver": "MySQL",
+        "server": "127.0.0.1",
+        "port": 3310,
+        "database": "userdb",
+        "username": "root",
+        "password": "root",
+        "connectionTimeout": 30000,
+        "acquireTimeout": 30000,
+        "timeout": 30000
+      },
+      {
+        "name": "Publisher Service DB",
+        "driver": "MySQL",
+        "server": "127.0.0.1",
+        "port": 3309,
+        "database": "publisher_db",
+        "username": "root",
+        "password": "root",
+        "connectionTimeout": 30000,
+        "acquireTimeout": 30000,
+        "timeout": 30000
+      }
+    ],
+    "database-client.autoConnect": true,
+    "database-client.showStatusBar": true,
+    "database-client.autoLoadConnections": true,
+    "database-client.loadConnectionsOnStartup": true,
+    "database-client.showQueryHistory": true,
+    "database-client.enableAutoComplete": true,
+    "database-client.enableSyntaxHighlight": true
+  }
+} 

@@ -32,8 +32,7 @@ spring:
 jwt:
   expiration: 86400000
   refresh-expiration: 604800000
-  private-key-path: /app/keys/private_key.pem
-  public-key-path: /app/keys/public_key.pem
+
 
 springdoc:
   swagger-ui:

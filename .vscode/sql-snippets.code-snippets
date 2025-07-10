@@ -1,0 +1,108 @@
+{
+  "Ad Service - Show All Ads": {
+    "prefix": "ads-all",
+    "body": [
+      "USE addb;",
+      "SELECT * FROM advertisements;"
+    ],
+    "description": "Show all advertisements from Ad Service DB"
+  },
+  "Ad Service - Active Ads": {
+    "prefix": "ads-active",
+    "body": [
+      "USE addb;",
+      "SELECT * FROM advertisements WHERE status = 'ACTIVE';"
+    ],
+    "description": "Show active advertisements"
+  },
+  "Ad Service - Ad Count": {
+    "prefix": "ads-count",
+    "body": [
+      "USE addb;",
+      "SELECT COUNT(*) as total_ads FROM advertisements;"
+    ],
+    "description": "Count total advertisements"
+  },
+  "Campaign Service - Show All Campaigns": {
+    "prefix": "campaigns-all",
+    "body": [
+      "USE campaigndb;",
+      "SELECT * FROM campaigns;"
+    ],
+    "description": "Show all campaigns from Campaign Service DB"
+  },
+  "Campaign Service - Active Campaigns": {
+    "prefix": "campaigns-active",
+    "body": [
+      "USE campaigndb;",
+      "SELECT * FROM campaigns WHERE status = 'ACTIVE';"
+    ],
+    "description": "Show active campaigns"
+  },
+  "User Service - Show All Users": {
+    "prefix": "users-all",
+    "body": [
+      "USE userdb;",
+      "SELECT * FROM users;"
+    ],
+    "description": "Show all users from User Service DB"
+  },
+  "User Service - Admin Users": {
+    "prefix": "users-admin",
+    "body": [
+      "USE userdb;",
+      "SELECT * FROM users WHERE role = 'ADMIN';"
+    ],
+    "description": "Show admin users"
+  },
+  "Publisher Service - Show All Publishers": {
+    "prefix": "publishers-all",
+    "body": [
+      "USE publisherdb;",
+      "SELECT * FROM publishers;"
+    ],
+    "description": "Show all publishers from Publisher Service DB"
+  },
+  "Publisher Service - Active Publishers": {
+    "prefix": "publishers-active",
+    "body": [
+      "USE publisherdb;",
+      "SELECT * FROM publishers WHERE status = 'ACTIVE';"
+    ],
+    "description": "Show active publishers"
+  },
+  "Cross Service - Ad with Campaign": {
+    "prefix": "ad-campaign-join",
+    "body": [
+      "USE addb;",
+      "SELECT a.*, c.name as campaign_name, c.budget as campaign_budget",
+      "FROM advertisements a",
+      "LEFT JOIN campaigndb.campaigns c ON a.campaign_id = c.id;"
+    ],
+    "description": "Join advertisements with campaigns across services"
+  },
+  "Database Status Check": {
+    "prefix": "db-status",
+    "body": [
+      "-- Check all databases status",
+      "SHOW DATABASES;",
+      "",
+      "-- Ad Service DB",
+      "USE addb;",
+      "SELECT COUNT(*) as ad_count FROM advertisements;",
+      "",
+      "-- Campaign Service DB",
+      "USE campaigndb;",
+      "SELECT COUNT(*) as campaign_count FROM campaigns;",
+      "",
+      "-- User Service DB",
+      "USE userdb;",
+      "SELECT COUNT(*) as user_count FROM users;",
+      "",
+      "-- Publisher Service DB",
+      "USE publisherdb;",
+      "SELECT COUNT(*) as publisher_count FROM publishers;"
+    ],
+    "description": "Check status of all databases"
+  }
+} 

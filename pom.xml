@@ -34,6 +34,7 @@
 	
 	<modules>
 		<module>ad-service</module>
+		<module>ad-recommendation-service</module>
 		<module>api-gateway</module>
 		<module>batch-processing-service</module>
 		<module>campaign-service</module>

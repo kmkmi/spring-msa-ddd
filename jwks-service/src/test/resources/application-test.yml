@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    consul:
+      enabled: false
+    config:
+      enabled: false
+
+server:
+  port: 0
+
+logging:
+  level:
+    com.example.jwks: DEBUG
+    org.springframework.web: DEBUG
+
+# JWT 설정
+jwt:
+  private-key-path: src/test/resources/keys/private_key.pem
+  public-key-path: src/test/resources/keys/public_key.pem 

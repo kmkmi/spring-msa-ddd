@@ -1,0 +1,48 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 819B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 235B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/openjdk:17-jdk-slim
+#3 DONE 0.7s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 349B done
+#5 DONE 0.0s
+
+#6 [1/4] FROM docker.io/library/openjdk:17-jdk-slim@sha256:aaa3b3cb27e3e520b8f116863d0580c438ed55ecfa0bc126b41f68c3f62f9774
+#6 resolve docker.io/library/openjdk:17-jdk-slim@sha256:aaa3b3cb27e3e520b8f116863d0580c438ed55ecfa0bc126b41f68c3f62f9774 0.0s done
+#6 DONE 0.0s
+
+#7 [2/4] WORKDIR /app
+#7 CACHED
+
+#8 [3/4] COPY target/batch-processing-service-0.0.1-SNAPSHOT.jar app.jar
+#8 DONE 0.2s
+
+#9 [4/4] COPY src/main/resources/keys /app/keys
+#9 DONE 0.1s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 2.2s done
+#10 exporting manifest sha256:4b36df5fe51c74161b134e32ef584098ef3e08fdb18f4d561ee6b5c9eb0091e2 0.0s done
+#10 exporting config sha256:734a968c429f55d67dea89db39b17334b55ceaf4e0206192ea48256de9e369cc 0.0s done
+#10 exporting attestation manifest sha256:5623e921d88dd2dd07c66a4fc519f3b667eaf201dd150d428cb65a2665db8166 0.0s done
+#10 exporting manifest list sha256:5052294ecd999009d23dd29537ebc9a2a775908d0d0f5d14f46e4a42e47fa453 0.0s done
+#10 naming to docker.io/library/demo-batch-processing-service:latest
+#10 naming to docker.io/library/demo-batch-processing-service:latest done
+#10 unpacking to docker.io/library/demo-batch-processing-service:latest
+#10 unpacking to docker.io/library/demo-batch-processing-service:latest 0.5s done
+#10 DONE 2.8s
+
+#11 resolving provenance for metadata file
+#11 DONE 0.0s
+ batch-processing-service  Built

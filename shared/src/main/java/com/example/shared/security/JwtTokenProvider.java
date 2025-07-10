@@ -26,10 +26,10 @@ import java.util.List;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.private-key-path:/app/keys/private_key.pem}")
+    @Value("${jwt.private-key-path:classpath:keys/private_key.pem}")
     private String privateKeyPath;
 
-    @Value("${jwt.public-key-path:/app/keys/public_key.pem}")
+    @Value("${jwt.public-key-path:classpath:keys/public_key.pem}")
     private String publicKeyPath;
 
     protected long jwtExpirationMs = 86400000L; // 24시간 기본값

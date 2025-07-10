@@ -101,6 +101,11 @@ service:
     ad-recommendation: ${AD_RECOMMENDATION_URL:http://localhost:8087}
     jwks-service: ${JWKS_SERVICE_URL:http://localhost:8090}
 
+jwt:
+  private-key-path: ${JWT_PRIVATE_KEY_PATH:classpath:keys/private_key.pem}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public_key.pem}
+
+
 # ---
 # docker profile 오버라이드
 ---
@@ -186,6 +191,10 @@ service:
     batch-processing: ${BATCH_PROCESSING_URL:http://batch-processing:8088}
     ad-recommendation: ${AD_RECOMMENDATION_URL:http://ad-recommendation:8087}
     jwks-service: ${JWKS_SERVICE_URL:http://jwks-service:8090}
+
+jwt:
+  private-key-path: ${JWT_PRIVATE_KEY_PATH:/app/keys/private_key.pem}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH:/app/keys/public_key.pem}
 
 management:
   endpoints:
